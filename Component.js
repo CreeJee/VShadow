@@ -1,7 +1,7 @@
 /********************
 *  custom elements  *
 *********************/
-const elementRegistry = (()=>{
+const VShadow = (()=>{
     const tagNameSymbol = Symbol("@@tagName");
     const extendsSymbol = Symbol("@@extendsTagName");
     /**
@@ -13,7 +13,7 @@ const elementRegistry = (()=>{
             constructor(){
                 super();
                 this.root = this.attachShadow({mode: 'open'});
-                this.root.innerHTML = this.innerHTML;
+                this.root.innerHTML = await this.template;
                 // some property required
                 //some action needs
             }
@@ -31,6 +31,9 @@ const elementRegistry = (()=>{
             }
             static get [extendsSymbol](){
                 return super[extendsSymbol];
+            }
+            get template(){
+                return Promise.reject(new Error(`need implements [${this.name}.template]`));
             }
             //custom elements spec
             static async onRegister(){
@@ -62,7 +65,7 @@ const elementRegistry = (()=>{
         return classObj;
     }
     return new (
-        class ElementRegistry{
+        class VShadow{
             get tagNameSymbol(){
                 return tagNameSymbol;
             }
@@ -71,11 +74,9 @@ const elementRegistry = (()=>{
             }
             constructor(){
                 this.define = FixedType.expect(this.define,HTMLElement);
-                this.loadComponents = FixedType.expect(this.loadComponents,FixedType.Spread(String));
-                this.definedTag = [];
-                // FixedType.property(this)
-                //         .expect("foo",String)
-                //         .expect("bar",Boolean);
+                this.load = FixedType.expect(this.load,FixedType.Spread(String));
+                this.definedTag = {};
+                return Object.freeze(this);
             }
             /**
              *bind elementClass to customElements
@@ -92,21 +93,14 @@ const elementRegistry = (()=>{
                 );
                 window.customElements.define(registerdTagName,ElementClass,extendsTagName);
                 ElementClass.onRegister();
-                debugger;
+                return this.definedTag[registerdTagName] = ElementClass;
             }
             /**
              * @return {Promise<ElementRegistry.Component>}
              * @param {String[]} src
              */
-            async loadComponents(...src){
-                const getPath = (path) => `${path}`;
-                const scriptSettings = {
-                    method : "get",
-                    mode : "cors",
-                    cache: 'default'
-
-                };
-                await Promise.all(
+            async load(...src){
+                return await Promise.all(
                     src.map((path)=>import(path))
                 ).then(
                     (scriptSources)=>scriptSources.map((object,index)=>{
@@ -117,9 +111,7 @@ const elementRegistry = (()=>{
                             throw new Error(`it needs extends HTMLElement [soruce : ${src[index]}]`);
                         };
                     })
-                    /*JSX like 꼴의 표현식 적용 을 골라야하는데*/
                 )
-                return this;
             }
         }
     );
