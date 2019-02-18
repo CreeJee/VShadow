@@ -12,8 +12,11 @@ const VShadow = (()=>{
         const classObj = class BaseComponent extends anyHtmlClass{
             constructor(){
                 super();
-                this.root = this.attachShadow({mode: 'open'});
-                this.root.innerHTML = await this.template;
+                (async ()=>{
+                    this.root = this.attachShadow({mode: 'open'});
+                    this.root.innerHTML = await classObj.template;
+                    this.VShadow(this.root);
+                })()
                 // some property required
                 //some action needs
             }
@@ -32,28 +35,13 @@ const VShadow = (()=>{
             static get [extendsSymbol](){
                 return super[extendsSymbol];
             }
-            get template(){
-                return Promise.reject(new Error(`need implements [${this.name}.template]`));
+            static get template(){
+                let temp;
+                return (temp = super.template) ? temp :Promise.reject(new Error(`need implements [${this.name}.template]`));
             }
-            //custom elements spec
-            static async onRegister(){
-                return Promise.reject(new Error(`need implements [async ${this.name}.onRegister()]`));
-            }
-            //on dom attached
-            connectedCallback(){
-
-            }
-            //on dom deteched
-            disconnectedCallback(){
-
-            }
-            //on attribute change
-            attributeChangedCallback(key,oldVal,newVal){
-
-            }
-            //moved other document
-            adoptedCallback(oldDoc, newDoc) {
-
+            async VShadow(...args){
+                let temp;
+                return (temp = super.VShadow) instanceof Function ? temp(...args) : Promise.reject(new Error(`need implements [async ${this.name}.VShadow()]`));
             }
         };
         Object.defineProperty(classObj,"name",{
@@ -89,10 +77,11 @@ const VShadow = (()=>{
                 const registerdTagName = ElementClass[tagNameSymbol];
                 const extendsTagName = ElementClass[extendsSymbol];
                 window.customElements.whenDefined(registerdTagName).then(
-                    (res)=>{throw new Error(`duplicated Tag [name : ${registerdTagName}]`)}
+                    ()=>{
+                        // throw new Error(`duplicated Tag [name : ${registerdTagName}]`)
+                    }
                 );
                 window.customElements.define(registerdTagName,ElementClass,extendsTagName);
-                ElementClass.onRegister();
                 return this.definedTag[registerdTagName] = ElementClass;
             }
             /**
