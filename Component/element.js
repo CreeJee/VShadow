@@ -8,6 +8,8 @@ export default class CustomList extends HTMLElement{
     static get [VShadow.tagNameSymbol](){
         return "custom-counter";
     }
+    static async onFactory(factoryStorage){
+    }
     async VShadow(root){
         const countTag = root.getElementById("count");
         const addCountTag = root.getElementById("add-count");

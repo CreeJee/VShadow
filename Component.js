@@ -1,13 +1,17 @@
+// TODO : event 및 Async 그외 re-render 파이프라인 규격지원
+
 /********************
 *  custom elements  *
 *********************/
 const VShadow = (()=>{
     const tagNameSymbol = Symbol("@@tagName");
     const extendsSymbol = Symbol("@@extendsTagName");
+    const factorySymbol = Symbol("@@factorySymbol");
     /**
      * @param  {HTMLElement} anyHtmlClass [description]
      * @return {Class extends BaseComponent} [description]
      */
+    const componentStorage = {};
     const BaseComponent = (anyHtmlClass) => {
         const classObj = class BaseComponent extends anyHtmlClass{
             constructor(){
@@ -16,6 +20,7 @@ const VShadow = (()=>{
                     this.root = this.attachShadow({mode: 'open'});
                     this.root.innerHTML = await classObj.template;
                     this.VShadow(this.root);
+                    componentStorage[new.target.name].push(this);
                 })()
                 // some property required
                 //some action needs
@@ -43,6 +48,14 @@ const VShadow = (()=>{
                 let temp;
                 return (temp = super.VShadow) instanceof Function ? temp(...args) : Promise.reject(new Error(`need implements [async ${this.name}.VShadow()]`));
             }
+            static async onFactory(){
+                if(componentStorage[classObj.name] === undefined || typeof componentStorage[classObj.name].constructor !== Object){
+                    componentStorage[classObj.name] = [];
+                }
+                if (super.onFactory instanceof Function) {
+                    super.onFactory(componentStorage[classObj.name]);
+                }
+            }
         };
         Object.defineProperty(classObj,"name",{
             enumerable: false,
@@ -64,6 +77,7 @@ const VShadow = (()=>{
                 this.define = FixedType.expect(this.define,HTMLElement);
                 this.load = FixedType.expect(this.load,FixedType.Spread(String));
                 this.definedTag = {};
+                this.extendsTag = {};
                 return Object.freeze(this);
             }
             /**
@@ -76,12 +90,11 @@ const VShadow = (()=>{
                 const ElementClass = BaseComponent(OriginalClass);
                 const registerdTagName = ElementClass[tagNameSymbol];
                 const extendsTagName = ElementClass[extendsSymbol];
-                window.customElements.whenDefined(registerdTagName).then(
-                    ()=>{
-                        // throw new Error(`duplicated Tag [name : ${registerdTagName}]`)
-                    }
-                );
+                window.customElements.whenDefined(registerdTagName).then(ElementClass.onFactory);
                 window.customElements.define(registerdTagName,ElementClass,extendsTagName);
+                if (extendsTagName !== undefined) {
+                    this.extendsTag[extendsTagName] = ElementClass;
+                }
                 return this.definedTag[registerdTagName] = ElementClass;
             }
             /**
@@ -101,6 +114,27 @@ const VShadow = (()=>{
                         };
                     })
                 )
+            }
+            /**
+             * mapping document.createElement
+             * @param  {String} elementName 
+             * @param  {Object} options     
+             * @return {extends HTMLElements}             
+             * @beta
+             *
+             * it will be ignored key "is" for "options"
+             */
+            createElement(elementName,options = {}){
+                let extendsTag = this.extendsTag[elementName];
+                if(extendsTag instanceof HTMLElement){
+                    elementName = extendsTag[extendsSymbol];
+                    if (options.is !== undefined) {
+                        console.warn("it will ignored options [key : \"is\"]");
+                    }
+                    Object.assign(options,{is :extendsTag[extendsTagName]})
+                }
+                return document.createElement(elements,options)
+                // TODO : extendsTagName이 선언된 태그 한정으로 option재생성
             }
         }
     );
