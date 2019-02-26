@@ -21,11 +21,15 @@ const VShadow = (()=>{
                 get : (obj,prop)=>prop in this ? this[prop] instanceof Function ? this[prop].bind(this) : this[prop] : obj.get(prop)
             })
         }
-        addChild(classObj){
+        addChild(o){
             const childStorage = this.has(childSymbol) ? this.get(childSymbol) : this.set(childSymbol,new Store());
-            childStorage.has(classObj) ? childStorage.get(classObj) : childStorage.set(classObj,new Store());
+            return childStorage.has(o) ? childStorage.get(o) : childStorage.set(o,new Store());
         }
         // todo  : Template dispatch
+        // todo  : global Storage push (just suger)
+        //         event dispatch
+        //         event optimize
+        //         addChild for unique
     }
 
     const _Store = new Store();
@@ -43,7 +47,8 @@ const VShadow = (()=>{
                     this.root.innerHTML = await classObj.template;
                     this.VShadow(
                         this.root,
-                        _Store.get(anyHtmlClass)
+                        _Store.get(anyHtmlClass),
+                        _Store.addChild(this)
                     );
                 })()
                 // some property required
