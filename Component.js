@@ -12,6 +12,7 @@ const VShadow = (()=>{
      * component store storage
      * @type {Map}
      */
+    
     class Store extends Map{
         constructor(){
             super();
@@ -22,8 +23,17 @@ const VShadow = (()=>{
             })
         }
         addChild(o){
-            const childStorage = this.has(childSymbol) ? this.get(childSymbol) : this.set(childSymbol,new Store());
+            const childStorage = this.init(childSymbol);
             return childStorage.has(o) ? childStorage.get(o) : childStorage.set(o,new Store());
+        }
+        init(o){
+            return this.has(o) ? this.get(o) : this.set(o,new Store());
+        }
+        getChild(o){
+            return this.get(childSymbol).get(o);
+        }
+        get root(){
+            return _Store instanceof Store ? _Store : _Store = new Store();
         }
         // todo  : Template dispatch
         // todo  : global Storage push (just suger)
@@ -31,7 +41,6 @@ const VShadow = (()=>{
         //         event optimize
         //         addChild for unique
     }
-
     const _Store = new Store();
     console.log(_Store);
     /**
@@ -43,12 +52,17 @@ const VShadow = (()=>{
             constructor(){
                 super();
                 (async ()=>{
+                    const ROOT_HTML = document.children[0];
+                    const _getParent = (_parnet)=>_parnet.$store instanceof Store ? _parnet.$store : _parnet === ROOT_HTML ? _Store : _getParent(_parnet.parentElement) ;
+
                     this.root = this.attachShadow({mode: 'open'});
+                    this.$parent = _getParent(this.parentElement);
+                    this.$store = this.$parent.addChild(this)
                     this.root.innerHTML = await classObj.template;
                     this.VShadow(
                         this.root,
                         _Store.get(anyHtmlClass),
-                        _Store.addChild(this)
+                        this.$store,
                     );
                 })()
                 // some property required
@@ -78,10 +92,14 @@ const VShadow = (()=>{
                 return (temp = super.VShadow) instanceof Function ? temp(...args) : Promise.reject(new Error(`need implements [async ${this.name}.VShadow()]`));
             }
             static async onFactory(){
-                _Store.addChild(anyHtmlClass);
+                _Store.init(anyHtmlClass);
                 if (super.onFactory instanceof Function) {
                     super.onFactory(_Store.get(anyHtmlClass));
                 }
+            }
+            connectedCallback(){
+                
+                super.connectedCallback();
             }
         };
         Object.defineProperty(classObj,"name",{
