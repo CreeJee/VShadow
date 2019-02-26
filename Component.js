@@ -25,6 +25,7 @@ const VShadow = (()=>{
             const childStorage = this.has(childSymbol) ? this.get(childSymbol) : this.set(childSymbol,new Store());
             childStorage.has(classObj) ? childStorage.get(classObj) : childStorage.set(classObj,new Store());
         }
+        // todo  : Template dispatch
     }
 
     const _Store = new Store();
