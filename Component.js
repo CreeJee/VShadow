@@ -8,6 +8,7 @@ const VShadow = (()=>{
     const extendsSymbol = Symbol("@@extendsTagName");
     const factorySymbol = Symbol("@@factorySymbol");
     const childSymbol = Symbol("@@child");
+    const observeSymbol = Symbol("@@dispatchObserveAction");
     /**
      * component store storage
      * @type {Map}
@@ -16,15 +17,20 @@ const VShadow = (()=>{
     class Store extends Map{
         constructor(){
             super();
+            
             // Store get,set proxy
             return new Proxy(this,{
                 set : (obj,prop,value)=>obj.set(prop,value),
                 get : (obj,prop)=>prop in this ? this[prop] instanceof Function ? this[prop].bind(this) : this[prop] : obj.get(prop)
             })
         }
+        set(k,v){
+            const o = super.set(k,v);
+            const handlers = this.get(observeStore).get(k);
+            (Array.isArray(handlers) ? handlers : []).forEach((handle)=>handle(v))
+        }
         addChild(o){
-            const childStorage = this.init(childSymbol);
-            return childStorage.has(o) ? childStorage.get(o) : childStorage.set(o,new Store());
+            return this.init(childSymbol).init(o);
         }
         init(o){
             return this.has(o) ? this.get(o) : this.set(o,new Store());
@@ -35,14 +41,19 @@ const VShadow = (()=>{
         get root(){
             return _Store instanceof Store ? _Store : _Store = new Store();
         }
+        attach(prop,...action){
+            const observeStore = this.init(observeSymbol);
+            action.forEach((f)=>{
+                if(!(f instanceof Function)){
+                    throw new Error(`[${f.toString()}] is not Function handler`);
+                }
+            })
+            Array.isArray(observeStore[prop]) ?  observeStore[prop].concat(action) : observeStore[prop] = action;
+        }
         // todo  : Template dispatch
-        // todo  : global Storage push (just suger)
-        //         event dispatch
-        //         event optimize
-        //         addChild for unique
+        //         module dispatch
     }
     const _Store = new Store();
-    console.log(_Store);
     /**
      * @param  {HTMLElement} anyHtmlClass [description]
      * @return {Class extends BaseComponent} [description]
