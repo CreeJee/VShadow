@@ -7,11 +7,32 @@ const VShadow = (()=>{
     const tagNameSymbol = Symbol("@@tagName");
     const extendsSymbol = Symbol("@@extendsTagName");
     const factorySymbol = Symbol("@@factorySymbol");
+    const childSymbol = Symbol("@@child");
+    /**
+     * component store storage
+     * @type {Map}
+     */
+    class Store extends Map{
+        constructor(){
+            super();
+            // Store get,set proxy
+            return new Proxy(this,{
+                set : (obj,prop,value)=>obj.set(prop,value),
+                get : (obj,prop)=>prop in this ? this[prop] instanceof Function ? this[prop].bind(this) : this[prop] : obj.get(prop)
+            })
+        }
+        addChild(classObj){
+            const childStorage = this.has(childSymbol) ? this.get(childSymbol) : this.set(childSymbol,new Store());
+            childStorage.has(classObj) ? childStorage.get(classObj) : childStorage.set(classObj,new Store());
+        }
+    }
+
+    const _Store = new Store();
+    console.log(_Store);
     /**
      * @param  {HTMLElement} anyHtmlClass [description]
      * @return {Class extends BaseComponent} [description]
      */
-    const componentStorage = {};
     const BaseComponent = (anyHtmlClass) => {
         const classObj = class BaseComponent extends anyHtmlClass{
             constructor(){
@@ -19,8 +40,10 @@ const VShadow = (()=>{
                 (async ()=>{
                     this.root = this.attachShadow({mode: 'open'});
                     this.root.innerHTML = await classObj.template;
-                    this.VShadow(this.root);
-                    componentStorage[new.target.name].push(this);
+                    this.VShadow(
+                        this.root,
+                        _Store.get(anyHtmlClass)
+                    );
                 })()
                 // some property required
                 //some action needs
@@ -49,11 +72,9 @@ const VShadow = (()=>{
                 return (temp = super.VShadow) instanceof Function ? temp(...args) : Promise.reject(new Error(`need implements [async ${this.name}.VShadow()]`));
             }
             static async onFactory(){
-                if(componentStorage[classObj.name] === undefined || typeof componentStorage[classObj.name].constructor !== Object){
-                    componentStorage[classObj.name] = [];
-                }
+                _Store.addChild(anyHtmlClass);
                 if (super.onFactory instanceof Function) {
-                    super.onFactory(componentStorage[classObj.name]);
+                    super.onFactory(_Store.get(anyHtmlClass));
                 }
             }
         };

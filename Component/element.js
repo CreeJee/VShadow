@@ -8,18 +8,20 @@ export default class CustomList extends HTMLElement{
     static get [VShadow.tagNameSymbol](){
         return "custom-counter";
     }
-    static async onFactory(factoryStorage){
+    static async onFactory(store){
+        store.count = 0;
     }
-    async VShadow(root){
+    async VShadow(root,$store){
         const countTag = root.getElementById("count");
         const addCountTag = root.getElementById("add-count");
-        countTag.innerHTML = 0;
+        countTag.innerHTML = $store.count;
         addCountTag.addEventListener("click",()=>{
-            countTag.innerHTML = 1+parseInt(countTag.innerHTML); 
+            countTag.innerHTML = parseInt(++$store.count); 
         })
     }
     //on dom attached
     connectedCallback(){
+
     }
     //on dom deteched
     disconnectedCallback(){
