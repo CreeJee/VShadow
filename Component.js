@@ -6,34 +6,44 @@
 const VShadow = (()=>{
     const tagNameSymbol = Symbol("@@tagName");
     const extendsSymbol = Symbol("@@extendsTagName");
-    const factorySymbol = Symbol("@@factorySymbol");
     const childSymbol = Symbol("@@child");
+    const factorySymbol = Symbol("@@factorySymbol");
     const observeSymbol = Symbol("@@dispatchObserveAction");
+    // RootStore
+    let _Store = null;
     /**
      * component store storage
      * @type {Map}
      */
-    
     class Store extends Map{
         constructor(){
             super();
             
             // Store get,set proxy
             return new Proxy(this,{
-                set : (obj,prop,value)=>obj.set(prop,value),
+                set : (obj,prop,value)=>obj.setState(prop,value),
                 get : (obj,prop)=>prop in this ? this[prop] instanceof Function ? this[prop].bind(this) : this[prop] : obj.get(prop)
             })
         }
-        set(k,v){
-            const o = super.set(k,v);
-            const handlers = this.get(observeStore).get(k);
-            (Array.isArray(handlers) ? handlers : []).forEach((handle)=>handle(v))
+        setState(k,v){
+            const oldValue = this.get(k);
+            const newValue = this.set(k,v);
+            const handlerMap = this.get(observeSymbol);
+            let handlers = null;
+            if(handlerMap instanceof Store){
+                handlers = handlerMap.get(k);
+                (Array.isArray(handlers) ? handlers : []).forEach((handle)=>handle(oldValue,newValue));
+            }
+            return newValue;
         }
         addChild(o){
             return this.init(childSymbol).init(o);
         }
-        init(o){
-            return this.has(o) ? this.get(o) : this.set(o,new Store());
+        init(o,v = new Store()){
+            if(!this.has(o)){
+                this.set(o,v);
+            }
+            return this.get(o);
         }
         getChild(o){
             return this.get(childSymbol).get(o);
@@ -43,17 +53,15 @@ const VShadow = (()=>{
         }
         attach(prop,...action){
             const observeStore = this.init(observeSymbol);
-            action.forEach((f)=>{
-                if(!(f instanceof Function)){
-                    throw new Error(`[${f.toString()}] is not Function handler`);
-                }
-            })
-            Array.isArray(observeStore[prop]) ?  observeStore[prop].concat(action) : observeStore[prop] = action;
+            const nonHandler = action.filter((f)=>!(f instanceof Function));
+            const observeHandlers = observeStore.get(prop);
+            if(nonHandler.length > 0){
+                throw new Error(`is't compatible at [${nonHandler.join(",")}}]`)
+            }
+            Array.isArray(observeHandlers) ?  observeHandlers.concat(action) : observeStore.set(prop,action);
         }
-        // todo  : Template dispatch
-        //         module dispatch
     }
-    const _Store = new Store();
+    _Store = new Store();
     /**
      * @param  {HTMLElement} anyHtmlClass [description]
      * @return {Class extends BaseComponent} [description]
@@ -68,11 +76,13 @@ const VShadow = (()=>{
 
                     this.root = this.attachShadow({mode: 'open'});
                     this.$parent = _getParent(this.parentElement);
-                    this.$store = this.$parent.addChild(this)
+                    this.$store = this.$parent.addChild(this);
+                    this.$factory = _Store.get(factorySymbol).get(anyHtmlClass);
+                    this.$factory.addChild(this.$store);
                     this.root.innerHTML = await classObj.template;
                     this.VShadow(
                         this.root,
-                        _Store.get(anyHtmlClass),
+                        this.$factory,
                         this.$store,
                     );
                 })()
@@ -103,9 +113,10 @@ const VShadow = (()=>{
                 return (temp = super.VShadow) instanceof Function ? temp(...args) : Promise.reject(new Error(`need implements [async ${this.name}.VShadow()]`));
             }
             static async onFactory(){
-                _Store.init(anyHtmlClass);
+                const $factory = _Store.init(factorySymbol);
+                $factory.init(anyHtmlClass);
                 if (super.onFactory instanceof Function) {
-                    super.onFactory(_Store.get(anyHtmlClass));
+                    super.onFactory($factory.get(anyHtmlClass));
                 }
             }
             connectedCallback(){
@@ -146,7 +157,8 @@ const VShadow = (()=>{
                 const ElementClass = BaseComponent(OriginalClass);
                 const registerdTagName = ElementClass[tagNameSymbol];
                 const extendsTagName = ElementClass[extendsSymbol];
-                window.customElements.whenDefined(registerdTagName).then(ElementClass.onFactory);
+                // window.customElements.whenDefined(registerdTagName).then(ElementClass.onFactory);
+                ElementClass.onFactory();
                 window.customElements.define(registerdTagName,ElementClass,extendsTagName);
                 if (extendsTagName !== undefined) {
                     this.extendsTag[extendsTagName] = ElementClass;

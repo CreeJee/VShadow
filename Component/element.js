@@ -18,6 +18,9 @@ export default class CustomList extends HTMLElement{
         addCountTag.addEventListener("click",()=>{
             countTag.innerHTML = parseInt(++$store.count); 
         })
+        $store.attach("count",(oldVal,newVal)=>{
+            debugger;
+        })
     }
     //on dom attached
     connectedCallback(){

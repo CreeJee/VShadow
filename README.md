@@ -54,5 +54,6 @@
 - state manager + 각 컴포넛트 별로 State + event Trigger,delegate처리 이벤트 전파구현
     - 가벼운 store 개념 추가
         - event dispatch 관련 store전파 추가
+        - store에서 직접 call 추가
 
 
