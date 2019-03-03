@@ -1,9 +1,9 @@
 <!-- 
-    @experiment action
+    @experiment
 
     항상 인자및 불러오기는 내부스코프만 지원,
     호이스팅하면 이상하게 올라가는것들이 많을거기에
 -->
 <vs-eval method="Array.prototype.filter">
-    <vs-arguments type="$store.Type.Number"/>
+    <vs-arguments props="$store.foo"/>
 </vs-eval>
