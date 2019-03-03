@@ -86,8 +86,6 @@ const VShadow = (()=>{
                         this.$store,
                     );
                 })()
-                // some property required
-                //some action needs
             }
             static get [tagNameSymbol](){
                 const tagName = super[tagNameSymbol];

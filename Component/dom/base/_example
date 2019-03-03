@@ -1,0 +1,12 @@
+<vs-if cond="(foo == 1)">
+    <vs-async>  
+        <!-- print some async optionals tag -->
+    </vs-async>
+    <!-- or ?  -->
+    <vs-do promiseify>
+        
+    </vs-do>
+</vs-if>
+<vs-else>
+    
+</vs-else>
