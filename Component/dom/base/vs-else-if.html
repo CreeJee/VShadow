@@ -1,7 +1,11 @@
 <!-- 
     
-    tag : <vs-else-if cond="{condition}?" async? waterfall?></vs-else-if> 
+    tag : <vs-else-if cond="{condition}?"></vs-else-if> 
     next-tag : 
         special-action : [vs-else]
         *
 -->
+
+<template id="else-if" data-before-node="vs-if" data-optional-after-node="vs-else-if">
+    <slot></slot>
+</template>

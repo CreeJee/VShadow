@@ -5,12 +5,28 @@
 	<script src="./FixTyped.js"></script>
 	<script src="./Component.js"></script>
 	<script>
-		VShadow.load("./Component/element.js");
+		VShadow.load(
+			"./Component/element.js",
+			"./Component/vs-loop.js",
+			"./Component/vs-if.js"
+		);
 	</script>
 </head>
 <body>
 	<custom-counter>
 		<span>I AM CUSTOMIZED!</span>
 	</custom-counter>
+	<!-- <vs-loop as="$factory.foo">
+		<div>
+			<span> FOO !</span>
+		</div>
+	</vs-loop> -->
+	<vs-loop count="5" start="2">
+		<vs-if cond="$store.test">
+			<div>
+				<span> BAR !</span>
+			</div>
+		</vs-if>
+	</vs-loop>
 </body>
 </html>

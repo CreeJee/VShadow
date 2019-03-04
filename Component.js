@@ -9,6 +9,7 @@ const VShadow = (()=>{
     const childSymbol = Symbol("@@child");
     const factorySymbol = Symbol("@@factorySymbol");
     const observeSymbol = Symbol("@@dispatchObserveAction");
+    const rootSymbol = Symbol("@rootSymbol");
     // RootStore
     let _Store = null;
     /**
@@ -21,20 +22,26 @@ const VShadow = (()=>{
             
             // Store get,set proxy
             return new Proxy(this,{
-                set : (obj,prop,value)=>obj.setState(prop,value),
+                set : (obj,prop,value)=>obj.dispatch(prop,value),
                 get : (obj,prop)=>prop in this ? this[prop] instanceof Function ? this[prop].bind(this) : this[prop] : obj.get(prop)
             })
         }
-        setState(k,v){
-            const oldValue = this.get(k);
+        forceDispatch(k,v){
+            return this.set(k,v);
+        }
+        dispatch(k,v){
             const newValue = this.set(k,v);
+            this.commit(v,newValue);
+            return newValue;
+        }
+        commit(k,v){
+            const oldValue = this.get(k);
             const handlerMap = this.get(observeSymbol);
             let handlers = null;
             if(handlerMap instanceof Store){
                 handlers = handlerMap.get(k);
-                (Array.isArray(handlers) ? handlers : []).forEach((handle)=>handle(oldValue,newValue));
+                (Array.isArray(handlers) ? handlers : []).forEach((handle)=>handle(oldValue,v));
             }
-            return newValue;
         }
         addChild(o){
             return this.init(childSymbol).init(o);
@@ -83,7 +90,7 @@ const VShadow = (()=>{
                     this.VShadow(
                         this.root,
                         this.$factory,
-                        this.$store,
+                        this.$store
                     );
                 })()
             }
@@ -108,7 +115,7 @@ const VShadow = (()=>{
             }
             async VShadow(...args){
                 let temp;
-                return (temp = super.VShadow) instanceof Function ? temp(...args) : Promise.reject(new Error(`need implements [async ${this.name}.VShadow()]`));
+                return (temp = super.VShadow) instanceof Function ? temp.apply(this,args) : Promise.reject(new Error(`need implements [async ${this.name}.VShadow()]`));
             }
             static async onFactory(){
                 const $factory = _Store.init(factorySymbol);
@@ -137,6 +144,9 @@ const VShadow = (()=>{
             }
             get extendsSymbol(){
                 return extendsSymbol;
+            }
+            static get $store(){
+                return _Store;
             }
             constructor(){
                 this.define = FixedType.expect(this.define,HTMLElement);

@@ -1,7 +1,13 @@
 <!-- 
     
-    tag : <vs-if cond="{condition}?" async? waterfall?></vs-if> 
+    tag : <vs-if cond="{condition}?"></vs-if> 
     next-tag : 
         special-action : [vs-else,vs-else-if]
         *
 -->
+<style>
+    #slot{
+        display: none;
+    }
+</style>
+<slot id="slot" data-optional-after-node="vs-else-if,vs-else"></slot>

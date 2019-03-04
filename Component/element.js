@@ -24,7 +24,6 @@ export default class CustomList extends HTMLElement{
     }
     //on dom attached
     connectedCallback(){
-
     }
     //on dom deteched
     disconnectedCallback(){
