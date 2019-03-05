@@ -59,7 +59,7 @@ const VShadow = (()=>{
             connectedCallback(){
                 super.connectedCallback();
                 (async ()=>{
-                    const _getParent = (_parnet)=>_parnet.$store instanceof Store ? _parnet : _parnet === ROOT_HTML ? ROOT_HTML : _getParent(_parnet.parentNode) ;
+                    const _getParent = (_parnet)=>_parnet.$store instanceof Store ? _parnet : _parnet === ROOT_HTML ? ROOT_HTML : _getParent((_parnet instanceof DocumentFragment ? _parnet.root : _parent).parentNode) ;
 
                     this.root = this.attachShadow({mode: 'open'});
                     this.parent = _getParent(this.parentNode);
