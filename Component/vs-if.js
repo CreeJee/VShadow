@@ -1,14 +1,5 @@
 import VSLoop from "./vs-loop.js";
-const __parseExpr = (parent,expr)=>{
-    let keys = (parent instanceof Map ? Array.from(parent.keys()) : Object.keys(parent)).filter((k)=>!(typeof k === "symbol"));
-    let values = keys.map((k)=>parent[k]);
-    try{
-        return new Function(...keys.concat(`return ${expr};`))(...values);
-    }
-    catch(e){
-        throw new Error(`undefined expression on [${expr}]`);
-    }
-}
+import EventCore from "./core/event.js";
 export default class VSif extends HTMLElement{
     constructor(){
         super();
@@ -21,10 +12,21 @@ export default class VSif extends HTMLElement{
     }
     async VShadow(root,$factory,$store){
         const attributes = root.host.attributes;
-        const baseElementArray = root.getElementById("slot").assignedElements();
-
-        let cond = attributes.cond ? !!__parseExpr(this.$parent,attributes.cond.value) : false;
+        const slots = root.getElementById("slot");
+        const assignedElements = slots.assignedElements();
         
+        let cond = attributes.cond ? !!EventCore.parseExpression(this.parent,attributes.cond.value) : false;
+        if(!cond){
+            this.remove();
+        }
+        else if(root.host.parent instanceof VSLoop){
+            $store.attach(VSLoop.iterateSymbol,(oldVal,newVal)=>{
+            })
+        }
+        else{
+            debugger;
+        }
+
         // TODO : cond
     }
     //on dom attached

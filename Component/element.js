@@ -1,4 +1,5 @@
-export default class CustomList extends HTMLElement{
+import VSElement from "./core/vs-element.js";
+export default class CustomList extends VSElement{
     constructor(){
         super();
     }

@@ -6,69 +6,17 @@
 const VShadow = (()=>{
     const tagNameSymbol = Symbol("@@tagName");
     const extendsSymbol = Symbol("@@extendsTagName");
-    const childSymbol = Symbol("@@child");
     const factorySymbol = Symbol("@@factorySymbol");
-    const observeSymbol = Symbol("@@dispatchObserveAction");
-    const rootSymbol = Symbol("@rootSymbol");
-    // RootStore
+    const ROOT_HTML = document.children[0];
+    let Store = null;
     let _Store = null;
-    /**
-     * component store storage
-     * @type {Map}
-     */
-    class Store extends Map{
-        constructor(){
-            super();
-            
-            // Store get,set proxy
-            return new Proxy(this,{
-                set : (obj,prop,value)=>obj.dispatch(prop,value),
-                get : (obj,prop)=>prop in this ? this[prop] instanceof Function ? this[prop].bind(this) : this[prop] : obj.get(prop)
-            })
-        }
-        forceDispatch(k,v){
-            return this.set(k,v);
-        }
-        dispatch(k,v){
-            const newValue = this.set(k,v);
-            this.commit(v,newValue);
-            return newValue;
-        }
-        commit(k,v){
-            const oldValue = this.get(k);
-            const handlerMap = this.get(observeSymbol);
-            let handlers = null;
-            if(handlerMap instanceof Store){
-                handlers = handlerMap.get(k);
-                (Array.isArray(handlers) ? handlers : []).forEach((handle)=>handle(oldValue,v));
-            }
-        }
-        addChild(o){
-            return this.init(childSymbol).init(o);
-        }
-        init(o,v = new Store()){
-            if(!this.has(o)){
-                this.set(o,v);
-            }
-            return this.get(o);
-        }
-        getChild(o){
-            return this.get(childSymbol).get(o);
-        }
-        get root(){
-            return _Store instanceof Store ? _Store : _Store = new Store();
-        }
-        attach(prop,...action){
-            const observeStore = this.init(observeSymbol);
-            const nonHandler = action.filter((f)=>!(f instanceof Function));
-            const observeHandlers = observeStore.get(prop);
-            if(nonHandler.length > 0){
-                throw new Error(`is't compatible at [${nonHandler.join(",")}}]`)
-            }
-            Array.isArray(observeHandlers) ?  observeHandlers.concat(action) : observeStore.set(prop,action);
-        }
-    }
-    _Store = new Store();
+    (async ()=>{
+        Store = (await import("./Component/core/store.js")).default;
+        // RootStore
+        _Store = new Store();
+        //non - safe but side effect
+        ROOT_HTML.$store = _Store;
+    })()
     /**
      * @param  {HTMLElement} anyHtmlClass [description]
      * @return {Class extends BaseComponent} [description]
@@ -77,22 +25,6 @@ const VShadow = (()=>{
         const classObj = class BaseComponent extends anyHtmlClass{
             constructor(){
                 super();
-                (async ()=>{
-                    const ROOT_HTML = document.children[0];
-                    const _getParent = (_parnet)=>_parnet.$store instanceof Store ? _parnet.$store : _parnet === ROOT_HTML ? _Store : _getParent(_parnet.parentElement) ;
-
-                    this.root = this.attachShadow({mode: 'open'});
-                    this.$parent = _getParent(this.parentElement);
-                    this.$store = this.$parent.addChild(this);
-                    this.$factory = _Store.get(factorySymbol).get(anyHtmlClass);
-                    this.$factory.addChild(this.$store);
-                    this.root.innerHTML = await classObj.template;
-                    this.VShadow(
-                        this.root,
-                        this.$factory,
-                        this.$store
-                    );
-                })()
             }
             static get [tagNameSymbol](){
                 const tagName = super[tagNameSymbol];
@@ -125,8 +57,35 @@ const VShadow = (()=>{
                 }
             }
             connectedCallback(){
-                
                 super.connectedCallback();
+                (async ()=>{
+                    const _getParent = (_parnet)=>_parnet.$store instanceof Store ? _parnet : _parnet === ROOT_HTML ? ROOT_HTML : _getParent(_parnet.parentNode) ;
+
+                    this.root = this.attachShadow({mode: 'open'});
+                    this.parent = _getParent(this.parentNode);
+                    this.$store = this.parent.$store.addChild(this);
+                    this.$factory = _Store.get(factorySymbol).get(anyHtmlClass);
+                    this.$factory.addChild(this.$store);
+                    this.root.innerHTML = await classObj.template;
+                    this.VShadow(
+                        this.root,
+                        this.$factory,
+                        this.$store
+                    );
+                })();
+                //console.log(`connectedCallback ${this.tagName}`);
+            }
+            //on dom deteched
+            disconnectedCallback(){
+                //console.log(`disconnectedCallback ${this.tagName}`);
+            }
+            //on attribute change
+            attributeChangedCallback(key,oldVal,newVal){
+                //console.log(`attributeChangedCallback ${this.tagName}`);
+            }
+            //moved other document
+            adoptedCallback(oldDoc, newDoc) {
+                // console.log(`attributeChangedCallback ${this.tagName}`);
             }
         };
         Object.defineProperty(classObj,"name",{
