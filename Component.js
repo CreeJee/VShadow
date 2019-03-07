@@ -128,11 +128,11 @@ const VShadow = (()=>{
                 // window.customElements.whenDefined(registerdTagName).then(ElementClass.onFactory);
                 ElementClass.onFactory();
                 return (Array.isArray(registerdTagName) ? registerdTagName : [registerdTagName]).map((tagName)=>{
-                    window.customElements.define(registerdTagName,ElementClass,extendsTagName ? {extends : extendsTagName} : undefined);
+                    window.customElements.define(tagName,ElementClass,extendsTagName ? {extends : extendsTagName} : undefined);
                     if (extendsTagName !== undefined) {
                         this.extendsTag[extendsTagName] = ElementClass;
                     }
-                    this.definedTag[registerdTagName] = ElementClass;
+                    this.definedTag[tagName] = ElementClass;
                     return ElementClass;
                 });
             }
