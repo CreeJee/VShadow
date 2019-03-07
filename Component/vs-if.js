@@ -1,7 +1,7 @@
 import VSLoop from "./vs-loop.js";
-import EventCore from "./core/event.js";
+import VSEventCore from "./core/event.js";
 import VSElement from "./core/vs-element.js";
-import VSUtil from "./core/vs-util.js";
+import VSUtil from "./core/util.js";
 export default class VSif extends VSElement{
     constructor(){
         super();
@@ -17,7 +17,7 @@ export default class VSif extends VSElement{
         const slots = root.getElementById("slot");
         const assignedElements = slots.assignedElements();
         
-        let cond = attributes.cond ? !!EventCore.parseExpression(this.parent,attributes.cond.value) : false;
+        let cond = attributes.cond ? !!VSEventCore.parseExpression(this.parent,attributes.cond.value) : false;
         if(!cond){
             this.remove();
         }

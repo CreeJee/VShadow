@@ -1,7 +1,7 @@
 
-import EventCore from "./core/event.js";
+import VSEventCore from "./core/event.js";
 import VSElement from "./core/vs-element.js";
-import VSUtil from "./core/vs-util.js";
+import VSUtil from "./core/util.js";
 const __getProperty = (data,...props)=>{
     if(props.length === 1){
         return data[props[0]];
@@ -29,17 +29,17 @@ export default class VSLoop extends VSElement{
         const slots = root.getElementById("slot");
         const assignedElements = slots.assignedElements();
         let temp = -1;
-        let iterateStart = attributes.start ? (isNaN(temp = parseInt(attributes.start.value)) ? EventCore.parseExpression(this.parent,attributes.start.value) : temp ) : 0;
-        let iterateCount = attributes.count ? (isNaN(temp = parseInt(attributes.count.value)) ? EventCore.parseExpression(this.parent,attributes.count.value) : temp ) : undefined; 
+        let iterateStart = attributes.start ? (isNaN(temp = parseInt(attributes.start.value)) ? VSEventCore.parseExpression(this.parent,attributes.start.value) : temp ) : 0;
+        let iterateCount = attributes.count ? (isNaN(temp = parseInt(attributes.count.value)) ? VSEventCore.parseExpression(this.parent,attributes.count.value) : temp ) : undefined; 
         let iterateAsArray = [];
         try{
-            iterateAsArray = attributes.as ? (EventCore.parseExpression(this.parent,attributes.as.value) || []).slice(iterateStart,iterateCount) : Array(iterateCount).fill(null,iterateStart,iterateCount).map((v,k)=>k);
+            iterateAsArray = attributes.as ? (VSEventCore.parseExpression(this.parent,attributes.as.value) || []).slice(iterateStart,iterateCount) : Array(iterateCount).fill(null,iterateStart,iterateCount).map((v,k)=>k);
         }
         catch(e){
             throw new Error(`undefined variable on [${attributes.as.value}]`);
         }
         iterateAsArray.forEach((v)=>{
-            EventCore.dispatchChild(assignedElements,root.host,iterateSymbol,v);
+            VSEventCore.dispatchChild(assignedElements,root.host,iterateSymbol,v);
         });
         assignedElements.forEach((node)=>{
             node.remove();
