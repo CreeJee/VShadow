@@ -127,14 +127,11 @@ const VShadow = (()=>{
                 const extendsTagName = ElementClass[extendsSymbol];
                 // window.customElements.whenDefined(registerdTagName).then(ElementClass.onFactory);
                 ElementClass.onFactory();
-                return (Array.isArray(registerdTagName) ? registerdTagName : [registerdTagName]).map((tagName)=>{
-                    window.customElements.define(tagName,ElementClass,extendsTagName ? {extends : extendsTagName} : undefined);
-                    if (extendsTagName !== undefined) {
-                        this.extendsTag[extendsTagName] = ElementClass;
-                    }
-                    this.definedTag[tagName] = ElementClass;
-                    return ElementClass;
-                });
+                window.customElements.define(registerdTagName,ElementClass,extendsTagName);
+                if (extendsTagName !== undefined) {
+                    this.extendsTag[extendsTagName] = ElementClass;
+                }
+                return this.definedTag[registerdTagName] = ElementClass;
             }
             /**
              * @return {Promise<ElementRegistry.Component[]>}
@@ -154,27 +151,27 @@ const VShadow = (()=>{
                     })
                 )
             }
-            // /**
-            //  * mapping document.createElement
-            //  * @param  {String} elementName 
-            //  * @param  {Object} options     
-            //  * @return {extends HTMLElements}             
-            //  * @beta
-            //  *
-            //  * it will be ignored key "is" for "options"
-            //  */
-            // createElement(elementName,options = {}){
-            //     let extendsTag = this.extendsTag[elementName];
-            //     if(extendsTag instanceof HTMLElement){
-            //         elementName = extendsTag[extendsSymbol];
-            //         if (options.is !== undefined) {
-            //             console.warn("it will ignored options [key : \"is\"]");
-            //         }
-            //         Object.assign(options,{is :extendsTag[extendsTagName]})
-            //     }
-            //     return document.createElement(elements,options)
-            //     // TODO : extendsTagName이 선언된 태그 한정으로 option재생성
-            // }
+            /**
+             * mapping document.createElement
+             * @param  {String} elementName 
+             * @param  {Object} options     
+             * @return {extends HTMLElements}             
+             * @beta
+             *
+             * it will be ignored key "is" for "options"
+             */
+            createElement(elementName,options = {}){
+                let extendsTag = this.extendsTag[elementName];
+                if(extendsTag instanceof HTMLElement){
+                    elementName = extendsTag[extendsSymbol];
+                    if (options.is !== undefined) {
+                        console.warn("it will ignored options [key : \"is\"]");
+                    }
+                    Object.assign(options,{is :extendsTag[extendsTagName]})
+                }
+                return document.createElement(elements,options)
+                // TODO : extendsTagName이 선언된 태그 한정으로 option재생성
+            }
         }
     );
 })();
