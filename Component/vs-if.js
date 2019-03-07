@@ -3,8 +3,8 @@ import VSEventCore from "./core/event.js";
 import VSElement from "./core/vs-element.js";
 import {getRelativeUrl} from "./core/util.js";
 export default class VSif extends VSElement{
-    constructor(){
-        super();
+    constructor(baseElement){
+        super(baseElement);
     }
     static get template(){
         return fetch(`${getRelativeUrl(import.meta.url)}/dom/base/vs-if.html`).then((res)=>res.text());

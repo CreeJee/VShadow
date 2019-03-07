@@ -259,7 +259,7 @@ const FixedType = (()=>{
                 if(
                     parent.has(obj) ||
                     (typeof obj === "function" ? !!this.__searchExtendTree(parent,obj) : false) ||
-                    (obj !== null && obj !== undefined && typeof obj[Symbol.hasInstance] === "function" ? !!Array.from(parent.values()).find(obj[Symbol.hasInstance]) : false) ||
+                    (obj !== null && obj !== undefined && typeof obj[Symbol.hasInstance] === "function" ? !!Array.from(parent.keys()).find(obj[Symbol.hasInstance]) : false) ||
                     !!(middlewareResult = this.__callMiddleWare(parent,obj)) === true
                 )
                 {
@@ -275,11 +275,11 @@ const FixedType = (()=>{
          * @param  {Map} parent             [from [TypeListSymbol]]
          * @param  {Function} classLike     [function Class,es6 class,etc...]
          * @return {Function}                [that extended class]
-         */
-        __searchExtendTree(parent,classLike){
-            if(parent instanceof Map && classLike instanceof Function){
-                return ( 
-                    ( 
+            */
+            __searchExtendTree(parent,classLike){
+                if(parent instanceof Map && classLike instanceof Function){
+                    return ( 
+                        ( 
                         (classLike = Object.getPrototypeOf(classLike)) && 
                         classLike !== Object && 
                         classLike.name

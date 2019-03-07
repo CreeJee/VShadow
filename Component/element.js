@@ -1,7 +1,7 @@
 import VSElement from "./core/vs-element.js";
 export default class CustomList extends VSElement{
-    constructor(){
-        super();
+    constructor(baseElement){
+        super(baseElement);
     }
     static get template(){
         return fetch("./Component/dom/element.html").then((res)=>res.text());
