@@ -6,7 +6,7 @@ function VSElement(superConstructor = HTMLElement){
         constructor(){
             super();
         }
-        extend(superConstructor){
+        static extend(superConstructor){
             return VSElement(superConstructor);
         }
     }
