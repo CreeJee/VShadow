@@ -1,11 +1,13 @@
 import VSLoop from "./vs-loop.js";
 import EventCore from "./core/event.js";
-export default class VSif extends HTMLElement{
+import VSElement from "./core/vs-element.js";
+import VSUtil from "./core/vs-util.js";
+export default class VSif extends VSElement{
     constructor(){
         super();
     }
     static get template(){
-        return fetch("./Component/dom/base/vs-if.html").then((res)=>res.text());
+        return fetch(`${VSUtil.getRelativeUrl(import.meta.url)}/dom/base/vs-if.html`).then((res)=>res.text());
     }
     static get [VShadow.tagNameSymbol](){
         return "vs-if";
@@ -20,14 +22,8 @@ export default class VSif extends HTMLElement{
             this.remove();
         }
         else if(root.host.parent instanceof VSLoop){
-            $store.attach(VSLoop.iterateSymbol,(oldVal,newVal)=>{
-            })
+            $store.attach(VSLoop.iterateSymbol,(oldVal,newVal)=>assignedElements.filter((element)=>element instanceof VSElement).map((el)=>el.$store.dispatch(VSLoop.iterateSymbol,newVal)))
         }
-        else{
-            debugger;
-        }
-
-        // TODO : cond
     }
     //on dom attached
     connectedCallback(){

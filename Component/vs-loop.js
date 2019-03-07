@@ -1,6 +1,7 @@
 
 import EventCore from "./core/event.js";
 import VSElement from "./core/vs-element.js";
+import VSUtil from "./core/vs-util.js";
 const __getProperty = (data,...props)=>{
     if(props.length === 1){
         return data[props[0]];
@@ -13,7 +14,7 @@ export default class VSLoop extends VSElement{
         super();
     }
     static get template(){
-        return fetch("./Component/dom/base/vs-loop.html").then((res)=>res.text());
+        return fetch(`${VSUtil.getRelativeUrl(import.meta.url)}/dom/base/vs-loop.html`).then((res)=>res.text());
     }
     static get [VShadow.tagNameSymbol](){
         return "vs-loop";
@@ -22,9 +23,7 @@ export default class VSLoop extends VSElement{
         return iterateSymbol;
     }
     async VShadow(root,$factory,$store){
-        $store.test = true;
-        //using for test
-
+        // $store.test = true;
 
         const attributes = root.host.attributes;
         const slots = root.getElementById("slot");

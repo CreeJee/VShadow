@@ -1,0 +1,1 @@
+export let getRelativeUrl = (filePath)=>filePath.split("/").slice(0,-1).join("/");
