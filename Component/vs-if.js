@@ -7,7 +7,7 @@ export default class VSif extends VSElement{
         super();
     }
     static get template(){
-        return fetch(`${VSUtil.getRelativeUrl(import.meta.url)}/dom/base/vs-if.html`).then((res)=>res.text());
+        return fetch(`${getRelativeUrl(import.meta.url)}/dom/base/vs-if.html`).then((res)=>res.text());
     }
     static get [VShadow.tagNameSymbol](){
         return "vs-if";
