@@ -126,7 +126,7 @@ const VShadow = (()=>{
                 const extendsTagName = ElementClass[extendsSymbol];
                 // window.customElements.whenDefined(registerdTagName).then(ElementClass.onFactory);
                 ElementClass.onFactory();
-                window.customElements.define(registerdTagName,ElementClass,extendsTagName);
+                window.customElements.define(registerdTagName,ElementClass,extendsTagName ? {extends : extendsTagName} : undefined);
                 if (extendsTagName !== undefined) {
                     this.extendsTag[extendsTagName] = ElementClass;
                 }
@@ -150,27 +150,27 @@ const VShadow = (()=>{
                     })
                 )
             }
-            /**
-             * mapping document.createElement
-             * @param  {String} elementName 
-             * @param  {Object} options     
-             * @return {extends HTMLElements}             
-             * @beta
-             *
-             * it will be ignored key "is" for "options"
-             */
-            createElement(elementName,options = {}){
-                let extendsTag = this.extendsTag[elementName];
-                if(extendsTag instanceof HTMLElement){
-                    elementName = extendsTag[extendsSymbol];
-                    if (options.is !== undefined) {
-                        console.warn("it will ignored options [key : \"is\"]");
-                    }
-                    Object.assign(options,{is :extendsTag[extendsTagName]})
-                }
-                return document.createElement(elements,options)
-                // TODO : extendsTagName이 선언된 태그 한정으로 option재생성
-            }
+            // /**
+            //  * mapping document.createElement
+            //  * @param  {String} elementName 
+            //  * @param  {Object} options     
+            //  * @return {extends HTMLElements}             
+            //  * @beta
+            //  *
+            //  * it will be ignored key "is" for "options"
+            //  */
+            // createElement(elementName,options = {}){
+            //     let extendsTag = this.extendsTag[elementName];
+            //     if(extendsTag instanceof HTMLElement){
+            //         elementName = extendsTag[extendsSymbol];
+            //         if (options.is !== undefined) {
+            //             console.warn("it will ignored options [key : \"is\"]");
+            //         }
+            //         Object.assign(options,{is :extendsTag[extendsTagName]})
+            //     }
+            //     return document.createElement(elements,options)
+            //     // TODO : extendsTagName이 선언된 태그 한정으로 option재생성
+            // }
         }
     );
 })();
