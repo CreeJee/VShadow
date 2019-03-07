@@ -1,7 +1,7 @@
 import VSLoop from "./vs-loop.js";
 import VSEventCore from "./core/event.js";
 import VSElement from "./core/vs-element.js";
-import VSUtil from "./core/util.js";
+import {getRelativeUrl} from "./core/util.js";
 export default class VSif extends VSElement{
     constructor(){
         super();

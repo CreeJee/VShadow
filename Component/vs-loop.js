@@ -1,7 +1,7 @@
 
 import VSEventCore from "./core/event.js";
 import VSElement from "./core/vs-element.js";
-import VSUtil from "./core/util.js";
+import {getRelativeUrl} from "./core/util.js";
 const __getProperty = (data,...props)=>{
     if(props.length === 1){
         return data[props[0]];
@@ -14,7 +14,7 @@ export default class VSLoop extends VSElement{
         super();
     }
     static get template(){
-        return fetch(`${VSUtil.getRelativeUrl(import.meta.url)}/dom/base/vs-loop.html`).then((res)=>res.text());
+        return fetch(`${getRelativeUrl(import.meta.url)}/dom/base/vs-loop.html`).then((res)=>res.text());
     }
     static get [VShadow.tagNameSymbol](){
         return "vs-loop";
