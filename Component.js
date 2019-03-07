@@ -28,10 +28,11 @@ const VShadow = (()=>{
             }
             static get [tagNameSymbol](){
                 const tagName = super[tagNameSymbol];
+                const tagNameCond = (tagName)=>typeof tagName === "string"  && tagName.includes("-");
                 if(tagName === undefined){
                     throw new Error(`need implements [${this.name}.${tagNameSymbol.toString()}]`);
                 }
-                else if(typeof tagName === "string"  && tagName.includes("-")){
+                else if(Array.isArray(tagName) ? tagName.filter(tagNameCond).length === 0 : tagNameCond(tagName)){
                     return tagName;
                 }
                 else{
