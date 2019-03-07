@@ -32,7 +32,7 @@ const VShadow = (()=>{
                 if(tagName === undefined){
                     throw new Error(`need implements [${this.name}.${tagNameSymbol.toString()}]`);
                 }
-                else if(Array.isArray(tagName) ? tagName.filter(tagNameCond).length === 0 : tagNameCond(tagName)){
+                else if(Array.isArray(tagName) ? tagName.filter(tagNameCond).length === tagName.length : tagNameCond(tagName)){
                     return tagName;
                 }
                 else{
