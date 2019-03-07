@@ -126,21 +126,24 @@ const VShadow = (()=>{
                 const extendsTagName = ElementClass[extendsSymbol];
                 // window.customElements.whenDefined(registerdTagName).then(ElementClass.onFactory);
                 ElementClass.onFactory();
-                window.customElements.define(registerdTagName,ElementClass,extendsTagName ? {extends : extendsTagName} : undefined);
-                if (extendsTagName !== undefined) {
-                    this.extendsTag[extendsTagName] = ElementClass;
-                }
-                return this.definedTag[registerdTagName] = ElementClass;
+                return (Array.isArray(registerdTagName) ? registerdTagName : [registerdTagName]).map((tagName)=>{
+                    window.customElements.define(registerdTagName,ElementClass,extendsTagName ? {extends : extendsTagName} : undefined);
+                    if (extendsTagName !== undefined) {
+                        this.extendsTag[extendsTagName] = ElementClass;
+                    }
+                    this.definedTag[registerdTagName] = ElementClass;
+                    return ElementClass;
+                });
             }
             /**
-             * @return {Promise<ElementRegistry.Component>}
+             * @return {Promise<ElementRegistry.Component[]>}
              * @param {String[]} src
              */
             async load(...src){
                 return await Promise.all(
                     src.map((path)=>import(path))
                 ).then(
-                    (scriptSources)=>scriptSources.map((object,index)=>{
+                    (scriptSources)=>scriptSources.flatMap((object,index)=>{
                         try{
                             return this.define(object.default);
                         }
