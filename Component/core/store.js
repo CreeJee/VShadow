@@ -7,7 +7,7 @@ const lazyObserveSymbol = Symbol("@@lazyDispatchObserveAction");
 * component store storage
 * @type {Map}
 */
-
+let _Store = null;
 export default class Store extends Map{
     constructor(){
         super();
@@ -16,6 +16,15 @@ export default class Store extends Map{
             set : (obj,prop,value)=>obj.dispatch(prop,value),
             get : (obj,prop)=>prop in this ? this[prop] instanceof Function ? this[prop].bind(this) : this[prop] : obj.get(prop)
         })
+    }
+    get children(){
+        return this.init(childSymbol,[]);
+    }
+    static get root(){
+        return _Store instanceof Store ? _Store : _Store = new Store();
+    }
+    get root(){
+        return this.constructor.root;
     }
     forceDispatch(k,v){
         return this.set(k,v);
@@ -38,16 +47,15 @@ export default class Store extends Map{
         }
     }
     addChild(o){
-        return this.init(childSymbol).init(o);
+        let child = new Store();
+        this.children.push(child);
+        return child;
     }
     init(o,v = new Store()){
         return (!this.has(o)) ? (this.set(o,v),v) : this.get(o);
     }
-    getChild(o){
-        return this.get(childSymbol).get(o);
-    }
-    get root(){
-        return _Store instanceof Store ? _Store : _Store = new Store();
+    hasChildren(o){
+        return this.children.includes(o);
     }
     attach(prop,...action){
         const observeStore = this.init(observeSymbol);

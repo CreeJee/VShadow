@@ -2,13 +2,14 @@
 import Store from "./store.js";
 export default {
     dispatchChild : (assignedElements,appendHost,k,v)=>{
+        let childStore = appendHost.$store.children;
         if(Array.isArray(assignedElements)){
             assignedElements.forEach((node)=>{
                 let cloneNode = node.cloneNode(true);
                 appendHost.appendChild(cloneNode);
-                if(cloneNode.$store instanceof Store){
-                    cloneNode.$store.lazyDispatch(k,v);
-                } 
+                if(childStore.length > 0){
+                    childStore[childStore.length-1].lazyDispatch(k,v);
+                }
             });
         }
         else{

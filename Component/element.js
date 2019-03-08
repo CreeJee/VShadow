@@ -1,4 +1,5 @@
 import VSElement from "./core/vs-element.js";
+import VSLoop from "./vs-loop.js";
 export default class CustomList extends VSElement{
     constructor(baseElement){
         super(baseElement);
@@ -20,6 +21,10 @@ export default class CustomList extends VSElement{
             countTag.innerHTML = parseInt(++$store.count); 
         })
         $store.attach("count",(oldVal,newVal)=>{
+            debugger;
+        })
+        $store.attach(VSLoop.iterateSymbol,(oldVal,newVal)=>{
+            console.log(root)
             debugger;
         })
     }

@@ -13,9 +13,8 @@ const VShadow = (()=>{
     (async ()=>{
         Store = (await import("./Component/core/store.js")).default;
         // RootStore
-        _Store = new Store();
         //non - safe but side effect
-        ROOT_HTML.$store = _Store;
+        _Store = ROOT_HTML.$store = Store.root;
     })()
     /**
      * @param  {HTMLElement} anyHtmlClass [description]
@@ -58,7 +57,6 @@ const VShadow = (()=>{
                 }
             }
             connectedCallback(){
-                super.connectedCallback();
                 (async ()=>{
                     const _getParent = (_parent)=>_parent.$store instanceof Store ? _parent : _parent === ROOT_HTML ? ROOT_HTML : _getParent((_parent instanceof DocumentFragment ? _parent.host : _parent).parentNode) ;
 
@@ -74,19 +72,16 @@ const VShadow = (()=>{
                         this.$store
                     );
                 })();
-                //console.log(`connectedCallback ${this.tagName}`);
+                super.connectedCallback();
             }
             //on dom deteched
             disconnectedCallback(){
-                //console.log(`disconnectedCallback ${this.tagName}`);
             }
             //on attribute change
             attributeChangedCallback(key,oldVal,newVal){
-                //console.log(`attributeChangedCallback ${this.tagName}`);
             }
             //moved other document
             adoptedCallback(oldDoc, newDoc) {
-                // console.log(`attributeChangedCallback ${this.tagName}`);
             }
         };
         Object.defineProperty(classObj,"name",{
