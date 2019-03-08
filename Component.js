@@ -101,7 +101,7 @@ const VShadow = (()=>{
                 return extendsSymbol;
             }
             get $store(){
-                return _Store;
+                return Store.root;
             }
             constructor(){
                 this.define = FixedType.expect(this.define,HTMLElement);
