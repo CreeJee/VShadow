@@ -100,7 +100,7 @@ const VShadow = (()=>{
             get extendsSymbol(){
                 return extendsSymbol;
             }
-            static get $store(){
+            get $store(){
                 return _Store;
             }
             constructor(){
