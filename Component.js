@@ -10,11 +10,13 @@ const VShadow = (()=>{
     const ROOT_HTML = document.children[0];
     let Store = null;
     let _Store = null;
+    let onLoad = ()=>{};
     (async ()=>{
         Store = (await import("./Component/core/store.js")).default;
         // RootStore
         //non - safe but side effect
         _Store = ROOT_HTML.$store = Store.root;
+        onLoad.apply(VShadow,[_Store]);
     })()
     /**
      * @param  {HTMLElement} anyHtmlClass [description]
@@ -92,6 +94,7 @@ const VShadow = (()=>{
         });
         return classObj;
     }
+    
     return new (
         class VShadow{
             get tagNameSymbol(){
@@ -102,6 +105,11 @@ const VShadow = (()=>{
             }
             get $store(){
                 return Store.root;
+            }
+            ready(functor){
+                if(functor instanceof Function){
+                    onLoad = functor;
+                }
             }
             constructor(){
                 this.define = FixedType.expect(this.define,HTMLElement);

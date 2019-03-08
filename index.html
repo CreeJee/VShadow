@@ -5,11 +5,13 @@
 	<script src="./FixTyped.js"></script>
 	<script src="./Component.js"></script>
 	<script>
-		VShadow.load(
-			"./Component/element.js",
-			"./Component/vs-loop.js",
-			"./Component/vs-if.js"
-		);
+		VShadow.ready(($root)=>{
+			VShadow.load(
+				"./Component/element.js",
+				"./Component/vs-loop.js",
+				"./Component/vs-if.js"
+			);
+		})
 	</script>
 	<style>
 		html,body{
