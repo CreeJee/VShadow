@@ -21,6 +21,9 @@ export default class VSLoop extends VSElement{
     static get [VShadow.tagNameSymbol](){
         return "vs-loop";
     }
+    static get observedAttributes() {
+      return ['start','count','data','as'];
+    }
     static get iterateSymbol(){
         return iterateSymbol;
     }
@@ -35,10 +38,11 @@ export default class VSLoop extends VSElement{
         let iterateAsArray = [];
         let fillEnd = -1;
         $store.set("start",iterateStart = attributes.start ? (isNaN(temp = parseInt(attributes.start.value)) ? VSEventCore.parseExpression(this.parent,attributes.start.value) : temp ) : 0);
-        $store.set("count",iterateCount = attributes.count ? ((isNaN(temp = parseInt(attributes.count.value)) ? VSEventCore.parseExpression(this.parent,attributes.count.value) : temp ) ) : undefined); 
+        $store.set("count",iterateCount = attributes.count ? (isNaN(temp = parseInt(attributes.count.value)) ? VSEventCore.parseExpression(this.parent,attributes.count.value) : temp ) : undefined); 
         fillEnd = iterateStart+iterateCount;
         try{
-            $store.set("data",iterateAsArray = attributes.as ? ($store.set(originalSymbol,VSEventCore.parseExpression(this.parent,attributes.as.value) || [])).slice(iterateStart,fillEnd) : Object.keys(Array(fillEnd).fill(null,iterateStart,fillEnd)));
+            $store.set("data",iterateAsArray = attributes.as ? ($store.set(originalSymbol,VSEventCore.parseExpression(this.parent,attributes.as.value) || [])).slice(iterateStart,fillEnd) : Array.from({ length: (fillEnd - iterateStart) }, (_, i) => iterateStart + (i)));
+            
         }
         catch(e){
             throw new Error(`undefined variable on [${attributes.as.value}]`);
@@ -50,7 +54,18 @@ export default class VSLoop extends VSElement{
         // dispatch new generate and cached
         iterateAsArray.forEach((v)=>VSEventCore.dispatchChild(assignedElements,root.host,iterateSymbol,v));
         const limitChange = (key,value)=>{
-            let iterateAsArray = key === "data" ? $store.set(originalSymbol,VSEventCore.parseExpression(this.parent,value)) : $store.get(originalSymbol);
+            let iterateAsArray = null;
+            if(key === "as"){
+                $store.set(originalSymbol,VSEventCore.parseExpression(this.parent,value))
+            }
+            else{
+                $store.set("data",
+                    $store.get("data").slice(
+                        $store.get("start"),
+                        $store.get("count")
+                    )
+                )
+            }
             iterateAsArray.forEach((v)=>VSEventCore.dispatchChild(assignedElements,root.host,iterateSymbol,v));
         };
         $store.attach("start",limitChange.bind(null,"start"));
@@ -69,8 +84,8 @@ export default class VSLoop extends VSElement{
     }
     //on attribute change
     attributeChangedCallback(key,oldVal,newVal){
-        debugger;
-        return this.$store.dispatch(key,VSEventCore.parseExpression(newVal));
+        let temp = 0;
+        return this.$store.dispatch(key,isNaN(temp = parseInt(newVal)) ? VSEventCore.parseExpression(this.parent,`$store.${key}`) : temp);
     }
     //moved other document
     adoptedCallback(oldDoc, newDoc) {

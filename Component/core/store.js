@@ -13,7 +13,7 @@ export default class Store extends Map{
         super();
         // Store get,set proxy
         return new Proxy(this,{
-            set : (obj,prop,value)=>obj.dispatch(prop,value),
+            set : (obj,prop,value)=>(obj.dispatch(prop,value,obj),true),
             get : (obj,prop)=>prop in this ? this[prop] instanceof Function ? this[prop].bind(this) : this[prop] : obj.get(prop)
         })
     }
@@ -33,9 +33,9 @@ export default class Store extends Map{
         return this.init(lazyObserveSymbol).set(k,v);
     }
     dispatch(k,v){
-       const newValue = this.set(k,v);
-       this.commit(v,newValue);
-       return newValue;
+       this.set(k,v);
+       this.commit(k,v);
+       return v;
     }
     commit(k,v,store=this){
         const oldValue = store.get(k);

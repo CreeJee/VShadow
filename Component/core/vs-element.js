@@ -9,6 +9,9 @@ function VSElement(superConstructor = HTMLElement){
         static extend(superConstructor){
             return VSElement(superConstructor);
         }
+        attributeChangedCallback(){
+            debugger;
+        }
     }
 };
 export default VSElement();

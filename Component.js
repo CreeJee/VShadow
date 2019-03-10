@@ -76,16 +76,6 @@ const VShadow = (()=>{
                     super.connectedCallback();
                 })();
             }
-            //on dom deteched
-            disconnectedCallback(){
-            }
-            //on attribute change
-            attributeChangedCallback(key,oldVal,newVal){
-                debugger;
-            }
-            //moved other document
-            adoptedCallback(oldDoc, newDoc) {
-            }
         };
         Object.defineProperty(classObj,"name",{
             enumerable: false,

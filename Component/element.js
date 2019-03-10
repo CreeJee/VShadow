@@ -18,14 +18,13 @@ export default class CustomList extends VSElement{
         const addCountTag = root.getElementById("add-count");
         countTag.innerHTML = ($store.count = 0);
         addCountTag.addEventListener("click",()=>{
-            countTag.innerHTML = parseInt(++$store.count); 
+            ++$store.count
         })
         $store.attach("count",(oldVal,newVal)=>{
-            debugger;
+            countTag.innerHTML = parseInt(newVal);
         })
         $store.attach(VSLoop.iterateSymbol,(oldVal,newVal)=>{
-            console.log(root)
-            debugger;
+            $store.dispatch("count",parseInt(newVal));
         })
     }
     //on dom attached
