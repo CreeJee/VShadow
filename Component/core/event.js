@@ -1,5 +1,4 @@
 
-import Store from "./store.js";
 export default {
     dispatchChild : (assignedElements,appendHost,k,v)=>{
         let childStore = appendHost.$store.children;
