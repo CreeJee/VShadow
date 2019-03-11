@@ -12,7 +12,7 @@ const limitChange = function(assignedElements,key,value){
     let $childStore = $store.children;
 
     if(key === "as"){
-        $store.set("as",data = VSEventCore.parseExpression(this.parent,value));
+        $store.set("as",value);
     }
     if(Array.isArray(data)){
         $store.set("data",data = data.slice(start,total));
