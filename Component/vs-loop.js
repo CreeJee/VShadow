@@ -28,6 +28,8 @@ const limitChange = function(assignedElements,key,value){
             VSEventCore.dispatchChild(assignedElements,this.root.host,iterateSymbol,v);
         }
     });
+    debugger;
+    // TODO : iterate관련 loop 핸들링
     $childStore.filter((v,i)=>!data.includes(i)).forEach(()=>{
         let index = data.length
         let garbageStore = $childStore.splice(index,1)[0];
