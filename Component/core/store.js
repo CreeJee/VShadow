@@ -47,8 +47,7 @@ export default class Store extends Map{
            (Array.isArray(handlers) ? handlers : []).forEach((handle)=>handle(oldValue,v));
         }
     }
-    addChild(o){
-        let child = new Store();
+    addChild(o,child = new Store()){
         this.children.push(child);
         return child;
     }

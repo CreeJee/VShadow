@@ -23,54 +23,15 @@ const VShadow = (()=>{
      * @return {Class extends BaseComponent} [description]
      */
     const BaseComponent = (anyHtmlClass) => {
+        const _getParent = (_parent)=>_parent.$store instanceof Store ? _parent : _parent === ROOT_HTML ? ROOT_HTML : _getParent((_parent instanceof DocumentFragment ? _parent.host : _parent.parentNode)) ;
         const classObj = class BaseComponent extends anyHtmlClass{
-            constructor(){
-                super();
-            }
-            static get [tagNameSymbol](){
-                const tagName = super[tagNameSymbol];
-                const tagNameCond = (tagName)=>typeof tagName === "string"  && tagName.includes("-");
-                if(tagName === undefined){
-                    throw new Error(`need implements [${this.name}.${tagNameSymbol.toString()}]`);
-                }
-                else if(Array.isArray(tagName) ? tagName.filter(tagNameCond).length === tagName.length : tagNameCond(tagName)){
-                    return tagName;
-                }
-                else{
-                    throw new Error(`need well-formated tagName [${this.name}.${tagNameSymbol.toString()}]`);
-                }
-            }
-            static get [extendsSymbol](){
-                return super[extendsSymbol];
-            }
-            static get template(){
-                let temp;
-                return (temp = super.template) ? temp :Promise.reject(new Error(`need implements [${this.name}.template]`));
-            }
-            async VShadow(...args){
-                let temp;
-                return (temp = super.VShadow) instanceof Function ? temp.apply(this,args) : Promise.reject(new Error(`need implements [async ${this.name}.VShadow()]`));
-            }
-            static async onFactory(){
-                const $factory = _Store.init(factorySymbol);
-                $factory.init(anyHtmlClass);
-                if (super.onFactory instanceof Function) {
-                    super.onFactory($factory.get(anyHtmlClass));
-                }
-            }
             connectedCallback(){
                 (async ()=>{
-                    const _getParent = (_parent)=>_parent.$store instanceof Store ? _parent : _parent === ROOT_HTML ? ROOT_HTML : _getParent((_parent instanceof DocumentFragment ? _parent.host : _parent.parentNode)) ;
-
-                    this.root = this.attachShadow({mode: 'open'});
                     this.parent = _getParent(this.parentNode);
-                    this.$store = this.parent.$store.addChild(this);
-                    this.$factory = _Store.get(factorySymbol).get(anyHtmlClass);
-                    this.$factory.addChild(this.$store);
+                    this.parent.$store.addChild(this,this.$store);
                     this.root.innerHTML = await classObj.template;
                     this.VShadow(
                         this.root,
-                        this.$factory,
                         this.$store
                     );
                     super.isReady = true;
@@ -126,12 +87,16 @@ const VShadow = (()=>{
                 const registerdTagName = ElementClass[tagNameSymbol];
                 const extendsTagName = ElementClass[extendsSymbol];
                 // window.customElements.whenDefined(registerdTagName).then(ElementClass.onFactory);
-                ElementClass.onFactory();
-                window.customElements.define(registerdTagName,ElementClass,extendsTagName);
-                if (extendsTagName !== undefined) {
-                    this.extendsTag[extendsTagName] = ElementClass;
+                if(typeof registerdTagName === "string"  && registerdTagName.includes("-")){
+                    window.customElements.define(registerdTagName,ElementClass,extendsTagName);
+                    if (extendsTagName !== undefined) {
+                        this.extendsTag[extendsTagName] = ElementClass;
+                    }
+                    return this.definedTag[registerdTagName] = ElementClass;
                 }
-                return this.definedTag[registerdTagName] = ElementClass;
+                else{
+                    throw new Error(`need well-formated tagName [${this.name}.${tagNameSymbol.toString()}]`);
+                }
             }
             /**
              * @return {Promise<ElementRegistry.Component[]>}

@@ -23,13 +23,8 @@
 	</style>
 </head>
 <body>
-	<!-- <vs-loop as="$factory.foo">
-		<div>
-			<span> FOO !</span>
-		</div>
-	</vs-loop> -->
 	<vs-loop total="20" start="1">
-		<vs-if cond="$store.test">
+		<vs-if cond="value % 2  === 0">
 			<p>
 				<custom-counter>
 					<span>I AM CUSTOMIZED!</span>

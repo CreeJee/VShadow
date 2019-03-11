@@ -8,11 +8,11 @@ const limitChange = function(assignedElements,key,value){
     let $store = this.$store;
     let start =  $store.get("start");
     let total = $store.get("total");
-    let data = $store.get("as");
+    let data = null;
     let $childStore = $store.children;
 
     if(key === "as"){
-        $store.set("as",value);
+        $store.set("as",data = value);
     }
     if(Array.isArray(data)){
         $store.set("data",data = data.slice(start,total));
@@ -51,7 +51,7 @@ export default class VSLoop extends VSElement{
     static get iterateSymbol(){
         return iterateSymbol;
     }
-    async VShadow(root,$factory,$store){
+    async VShadow(root,$store){
         const attributes = root.host.attributes;
         const slots = root.getElementById("slot");
         const assignedElements = slots.assignedElements();

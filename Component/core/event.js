@@ -9,7 +9,7 @@ export default {
                     appendHost.appendChild(node.cloneNode(true));  
                 }
                 if(childStore.length > 0){
-                    childStore[childStore.length-1].lazyDispatch(k,v);
+                    childStore[childStore.length-1].dispatch(k,v);
                 }
             });
         }

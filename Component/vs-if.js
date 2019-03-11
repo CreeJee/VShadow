@@ -3,10 +3,31 @@ import VSEventCore from "./core/event.js";
 import VSElement from "./core/vs-element.js";
 import {getRelativeUrl} from "./core/util.js";
 
-const condSymbol = Symbol("@@condSymbol");
+const condSymbol = Symbol("@@notCondSymbol");
+const isDispatched = Symbol("@@isDispatched");
+const _dispatch = (self,val)=>{
+    const attributes = self.attributes;
+    const $store = self.$store;
+    $store.children.forEach(($store)=>{
+        if(VSEventCore.parseExpression({value : val},(attributes.cond || {}).value)){
+            $store.dispatch(VSLoop.iterateSymbol,val)
+        }
+        else{
+            $store.dispatch(condSymbol,val);
+        }
+    })
+}
 export default class VSif extends VSElement{
     constructor(baseElement){
         super(baseElement);
+        this[isDispatched] = false;
+        this.$store.attach(VSLoop.iterateSymbol,(oldVal,newVal)=>{
+            this[isDispatched] = true;
+            _dispatch(this,newVal);
+        })
+    }
+    static get condSymbol(){
+        return condSymbol;
     }
     static get template(){
         return fetch(`${getRelativeUrl(import.meta.url)}/dom/base/vs-if.html`).then((res)=>res.text());
@@ -14,24 +35,14 @@ export default class VSif extends VSElement{
     static get [VShadow.tagNameSymbol](){
         return "vs-if";
     }
-    async VShadow(root,$factory,$store){
+    async VShadow(root,$store){
         const attributes = root.host.attributes;
         const slots = root.getElementById("slot");
-        const assignedElements = slots.assignedElements();
-        debugger;
-        let cond = false;
-        // $store.set("cond",cond = (attributes.cond ? !!VSEventCore.parseExpression(this.parent,attributes.cond.value) : false));
-        // if(!cond){
-        //     debugger;
-        // }
-        if(this.parent instanceof VSLoop){
-            $store.attach(VSLoop.iterateSymbol,(oldVal,newVal)=>{
-                $store.children.forEach(($store)=>$store.lazyDispatch(VSLoop.iterateSymbol,newVal))
-            })
+        if(!isDispatched){ 
+            let cond = (attributes.cond ? !!VSEventCore.parseExpression(this.parent,attributes.cond.value) : false)
+            _dispatch(this,$store);
         }
-        $store.attach("cond",(preVal,val)=>{
 
-        })
     }
     //on dom attached
     connectedCallback(){
