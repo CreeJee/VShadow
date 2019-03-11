@@ -26,11 +26,12 @@ export default class Store extends Map{
     get root(){
         return this.constructor.root;
     }
-    forceDispatch(k,v){
-        return this.set(k,v);
+    forceSet(k,v){
+        this.set(k,v);
+        return v;
     }
     lazyDispatch(k,v){
-        return this.init(lazyObserveSymbol).set(k,v);
+        return this.init(lazyObserveSymbol).forceSet(k,v);
     }
     dispatch(k,v){
        this.set(k,v);

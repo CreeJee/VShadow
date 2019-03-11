@@ -63,7 +63,7 @@ export default class VSLoop extends VSElement{
         $store.set("total",iterateTotal = attributes.total ? (isNaN(temp = parseInt(attributes.total.value)) ? VSEventCore.parseExpression(this.parent,attributes.total.value) : temp ) : undefined); 
         fillEnd = iterateStart+iterateTotal;
         try{
-            $store.set("data",iterateAsArray = attributes.as ? ($store.set("as",VSEventCore.parseExpression(this.parent,attributes.as.value) || [])).slice(iterateStart,fillEnd) : Array.from({ length: (fillEnd - iterateStart) }, (_, i) => iterateStart + (i)));
+            $store.set("data",iterateAsArray = attributes.as ? ($store.forceSet("as",VSEventCore.parseExpression(this.parent,attributes.as.value) || [])).slice(iterateStart,fillEnd) : Array.from({ length: (fillEnd - iterateStart) }, (_, i) => iterateStart + (i)));
         }
         catch(e){
             throw new Error(`undefined variable on [${attributes.as.value}]`);
