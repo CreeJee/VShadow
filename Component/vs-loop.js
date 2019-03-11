@@ -90,7 +90,7 @@ export default class VSLoop extends VSElement{
     //on attribute change
     attributeChangedCallback(key,oldVal,newVal){
         let temp = 0;
-        return this.$store.dispatch(key,isNaN(temp = parseInt(newVal)) ? VSEventCore.parseExpression(this.parent,`$store.${key}`) : temp);
+        return this.$store.dispatch(key,isNaN(temp = parseInt(newVal)) ? VSEventCore.parseExpression(this.parent,key) : temp);
     }
     //moved other document
     adoptedCallback(oldDoc, newDoc) {
