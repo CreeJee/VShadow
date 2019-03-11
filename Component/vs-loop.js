@@ -79,6 +79,7 @@ export default class VSLoop extends VSElement{
         $store.attach("start",limitChange.bind(this,assignedElements,"start"));
         $store.attach("total",limitChange.bind(this,assignedElements,"total"));
         $store.attach("data",limitChange.bind(this,assignedElements,"data"));
+        $store.attach("as",limitChange.bind(this,assignedElements,"as"));
     }
     //on dom attached
     connectedCallback(){
