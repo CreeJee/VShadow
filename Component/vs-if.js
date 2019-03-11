@@ -2,6 +2,8 @@ import VSLoop from "./vs-loop.js";
 import VSEventCore from "./core/event.js";
 import VSElement from "./core/vs-element.js";
 import {getRelativeUrl} from "./core/util.js";
+
+const condSymbol = Symbol("@@condSymbol");
 export default class VSif extends VSElement{
     constructor(baseElement){
         super(baseElement);
@@ -17,13 +19,19 @@ export default class VSif extends VSElement{
         const slots = root.getElementById("slot");
         const assignedElements = slots.assignedElements();
         
-        let cond = attributes.cond ? !!VSEventCore.parseExpression(this.parent,attributes.cond.value) : false;
+        let cond = false;
+        $store.set("cond",cond = (attributes.cond ? !!VSEventCore.parseExpression(this.parent,attributes.cond.value) : false));
         if(!cond){
-            this.remove();
+            debugger;
         }
-        else if(root.host.parent instanceof VSLoop){
-            $store.attach(VSLoop.iterateSymbol,(oldVal,newVal)=>assignedElements.filter((element)=>element instanceof VSElement).map((el)=>el.$store.dispatch(VSLoop.iterateSymbol,newVal)))
+        if(this.parent instanceof VSLoop){
+            $store.attach(VSLoop.iterateSymbol,(oldVal,newVal)=>{
+                $store.children.forEach(($store)=>$store.lazyDispatch(VSLoop.iterateSymbol,newVal))
+            })
         }
+        $store.attach("cond",(preVal,val)=>{
+
+        })
     }
     //on dom attached
     connectedCallback(){
@@ -34,7 +42,7 @@ export default class VSif extends VSElement{
     }
     //on attribute change
     attributeChangedCallback(key,oldVal,newVal){
-
+        this.$store.dispatch(key,newVal);
     }
     //moved other document
     adoptedCallback(oldDoc, newDoc) {

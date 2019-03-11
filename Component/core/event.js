@@ -1,11 +1,13 @@
 
+import Store from "./store.js";
 export default {
-    dispatchChild : (assignedElements,appendHost,k,v)=>{
+    dispatchChild : (assignedElements,appendHost,k,v,isInsert = true)=>{
         let childStore = appendHost.$store.children;
         if(Array.isArray(assignedElements)){
             assignedElements.forEach((node)=>{
-                let cloneNode = node.cloneNode(true);
-                appendHost.appendChild(cloneNode);
+                if(isInsert){
+                    appendHost.appendChild(node.cloneNode(true));  
+                }
                 if(childStore.length > 0){
                     childStore[childStore.length-1].lazyDispatch(k,v);
                 }
@@ -15,9 +17,9 @@ export default {
             throw new Error("unknown dispatch target");
         }
     },
-    parseExpression : (parent,expr)=>{
-        let keys = (parent instanceof Map ? Array.from(parent.keys()) : Object.keys(parent)).filter((k)=>!(typeof k === "symbol"));
-        let values = keys.map((k)=>parent[k]);
+    parseExpression : (store,expr)=>{
+        let keys = (store instanceof Store ? Array.from(store.keys()) : Object.keys(store)).filter((k)=>!(typeof k === "symbol"));
+        let values = keys.map((k)=>store[k]);
         try{
             return new Function(...keys.concat(`return ${expr};`))(...values);
         }

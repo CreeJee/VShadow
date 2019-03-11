@@ -73,8 +73,14 @@ const VShadow = (()=>{
                         this.$factory,
                         this.$store
                     );
+                    super.isReady = true;
                     super.connectedCallback();
                 })();
+            }
+            attributeChangedCallback(key,oldVal,newVal){
+                if(this.isReady){
+                    super.attributeChangedCallback(key,oldVal,newVal);
+                }
             }
         };
         Object.defineProperty(classObj,"name",{
@@ -149,7 +155,7 @@ const VShadow = (()=>{
              * mapping document.createElement
              * @param  {String} elementName 
              * @param  {Object} options     
-             * @return {extends HTMLElements}             
+             * @return {extends HTMLElement}             
              * @beta
              *
              * it will be ignored key "is" for "options"
