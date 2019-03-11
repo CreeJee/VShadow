@@ -52,8 +52,6 @@ export default class VSLoop extends VSElement{
         return iterateSymbol;
     }
     async VShadow(root,$factory,$store){
-        $store.test = true;
-        
         const attributes = root.host.attributes;
         const slots = root.getElementById("slot");
         const assignedElements = slots.assignedElements();

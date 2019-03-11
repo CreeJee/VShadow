@@ -18,12 +18,12 @@ export default class VSif extends VSElement{
         const attributes = root.host.attributes;
         const slots = root.getElementById("slot");
         const assignedElements = slots.assignedElements();
-        
+        debugger;
         let cond = false;
-        $store.set("cond",cond = (attributes.cond ? !!VSEventCore.parseExpression(this.parent,attributes.cond.value) : false));
-        if(!cond){
-            debugger;
-        }
+        // $store.set("cond",cond = (attributes.cond ? !!VSEventCore.parseExpression(this.parent,attributes.cond.value) : false));
+        // if(!cond){
+        //     debugger;
+        // }
         if(this.parent instanceof VSLoop){
             $store.attach(VSLoop.iterateSymbol,(oldVal,newVal)=>{
                 $store.children.forEach(($store)=>$store.lazyDispatch(VSLoop.iterateSymbol,newVal))
