@@ -8,7 +8,7 @@ const getWrappedChilds = (children,renederPerElement)=>Array.from(children).redu
 const limitChange = function(assignedElements,key,value){
     let $store = this.$store;
     let start =  $store.get("start");
-    let total = $store.get("total");
+    let total = $store.get("total")+1;
     let renederPerElement = assignedElements.length;
     let data = null;
     // child elements wrapping for one loop Render Array
@@ -75,7 +75,7 @@ export default class VSLoop extends VSElement{
         let iterateAsArray = [];
         let fillEnd = -1;
         $store.set("start",iterateStart = attributes.start ? (isNaN(temp = parseInt(attributes.start.value)) ? VSEventCore.parseExpression(this.parent,attributes.start.value) : temp ) : 0);
-        $store.set("total",iterateTotal = attributes.total ? (isNaN(temp = parseInt(attributes.total.value)) ? VSEventCore.parseExpression(this.parent,attributes.total.value) : temp ) : undefined); 
+        $store.set("total",iterateTotal = attributes.total ? (isNaN(temp = parseInt(attributes.total.value)) ? VSEventCore.parseExpression(this.parent,attributes.total.value) : temp )+1 : undefined); 
         fillEnd = iterateTotal;
         try{
             $store.set("data",iterateAsArray = attributes.as ? ($store.forceSet("as",VSEventCore.parseExpression(this.parent,attributes.as.value) || [])).slice(iterateStart,fillEnd) : Array.from({ length: (fillEnd - iterateStart) }, (_, i) => iterateStart + (i)));
