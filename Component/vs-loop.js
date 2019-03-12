@@ -4,11 +4,13 @@ import Store from "./core/store.js";
 import {getRelativeUrl} from "./core/util.js";
 
 const iterateSymbol = Symbol("@@IterateSymbol");
+const getRangeArray = (start,total)=>Array.from({ length: ((total) - start) }, (_, i) => start + (i))
 const getWrappedChilds = (children,renederPerElement)=>Array.from(children).reduce((accr,v,k,arr)=>(k % renederPerElement === 0 ? accr.push([v]) : accr[Math.floor(k/renederPerElement)].push(v),accr) ,[])
 const limitChange = function(assignedElements,key,value){
     let $store = this.$store;
     let start =  $store.get("start");
-    let total = $store.get("total")+1;
+    let total = $store.get("total");
+    debugger;
     let renederPerElement = assignedElements.length;
     let data = null;
     // child elements wrapping for one loop Render Array
@@ -30,7 +32,7 @@ const limitChange = function(assignedElements,key,value){
         $store.set("data",data = data.slice(start,total));
     }
     else{
-        $store.set("data",data = Array.from({ length: (total - start) }, (_, i) => start + (i)))
+        $store.set("data",data = getRangeArray(start,total))
     }
     // TODO : 지워질태그가 dispatch 되는 부분에 대하여 메모리 낭비 해결
     data.forEach((v,k,arr)=>{
@@ -40,13 +42,14 @@ const limitChange = function(assignedElements,key,value){
         }
         else{
             childNodeArray[k].forEach((node)=>{
+                debugger;
                 if(node.$store instanceof Store){
                     node.$store.dispatch(iterateSymbol,v);
                 }
             })
         }
     });
-    getWrappedChilds(this.children,renederPerElement).filter((v,i)=>!data[i]).flatMap((v)=>v).forEach((node)=>{
+    getWrappedChilds(this.children,renederPerElement).filter((v,i)=>data[i] === undefined).flatMap((v)=>v).forEach((node)=>{
         node.remove();
     })
 };
@@ -75,10 +78,10 @@ export default class VSLoop extends VSElement{
         let iterateAsArray = [];
         let fillEnd = -1;
         $store.set("start",iterateStart = attributes.start ? (isNaN(temp = parseInt(attributes.start.value)) ? VSEventCore.parseExpression(this.parent,attributes.start.value) : temp ) : 0);
-        $store.set("total",iterateTotal = attributes.total ? (isNaN(temp = parseInt(attributes.total.value)) ? VSEventCore.parseExpression(this.parent,attributes.total.value) : temp )+1 : undefined); 
+        $store.set("total",iterateTotal = attributes.total ? (isNaN(temp = parseInt(attributes.total.value)) ? VSEventCore.parseExpression(this.parent,attributes.total.value) : temp ) : undefined); 
         fillEnd = iterateTotal;
         try{
-            $store.set("data",iterateAsArray = attributes.as ? ($store.forceSet("as",VSEventCore.parseExpression(this.parent,attributes.as.value) || [])).slice(iterateStart,fillEnd) : Array.from({ length: (fillEnd - iterateStart) }, (_, i) => iterateStart + (i)));
+            $store.set("data",iterateAsArray = attributes.as ? ($store.forceSet("as",VSEventCore.parseExpression(this.parent,attributes.as.value) || [])).slice(iterateStart,fillEnd) : getRangeArray(iterateStart,fillEnd));
         }
         catch(e){
             throw new Error(`undefined variable on [${attributes.as.value}]`);
