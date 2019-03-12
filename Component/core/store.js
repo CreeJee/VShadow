@@ -51,6 +51,14 @@ export default class Store extends Map{
         this.children.push(child);
         return child;
     }
+    removeChild(o){
+        let index = this.children.indexOf(o);
+        let cond = index >= 0;
+        if(cond){
+            this.children.splice(index,1);
+        }
+        return cond;
+    }
     init(o,v = new Store()){
         return (!this.has(o)) ? (this.set(o,v),v) : this.get(o);
     }

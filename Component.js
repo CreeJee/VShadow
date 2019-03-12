@@ -43,6 +43,13 @@ const VShadow = (()=>{
                     super.attributeChangedCallback(key,oldVal,newVal);
                 }
             }
+            remove(){
+                this.parent.$store.delete(this);
+                this.$store = null;
+                this.root = null;
+                this.parent = null;
+                super.remove();
+            }
         };
         Object.defineProperty(classObj,"name",{
             enumerable: false,
