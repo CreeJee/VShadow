@@ -3,7 +3,7 @@ import VSEventCore from "./core/event.js";
 import VSElement from "./core/vs-element.js";
 import {getRelativeUrl} from "./core/util.js";
 
-const condSymbol = Symbol("@@notCondSymbol");
+const notSymbol = Symbol("@@notCondSymbol");
 const isDispatched = Symbol("@@isDispatched");
 const _dispatch = (self,val)=>{
     const attributes = self.attributes;
@@ -13,7 +13,7 @@ const _dispatch = (self,val)=>{
             $store.dispatch(VSLoop.iterateSymbol,val)
         }
         else{
-            $store.dispatch(condSymbol,val);
+            $store.dispatch(notSymbol,val);
         }
     })
 }
@@ -26,8 +26,8 @@ export default class VSif extends VSElement{
             _dispatch(this,newVal);
         })
     }
-    static get condSymbol(){
-        return condSymbol;
+    static get notSymbol(){
+        return notSymbol;
     }
     static get template(){
         return fetch(`${getRelativeUrl(import.meta.url)}/dom/base/vs-if.html`).then((res)=>res.text());

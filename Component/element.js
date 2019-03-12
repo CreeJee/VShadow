@@ -6,9 +6,10 @@ export default class CustomList extends VSElement{
         super(baseElement);
         this.$store.count = 0;
         this.$store.attach(VSLoop.iterateSymbol,(oldVal,newVal)=>{
+            debugger;
             this.$store.dispatch("count",parseInt(newVal));
         })
-        this.$store.attach(VSIf.condSymbol,(oldVal,newVal)=>{
+        this.$store.attach(VSIf.notSymbol,(value)=>{
             this.style.display = "none";
         })
     }

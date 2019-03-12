@@ -38,13 +38,13 @@ const limitChange = function(assignedElements,key,value){
     data.forEach((v,k,arr)=>{
         let selectedChild = childNodeArray[k];
         if(!Array.isArray(selectedChild)){
-            VSEventCore.dispatchChild(assignedElements,this,iterateSymbol,v);
+            VSEventCore.dispatchChild(assignedElements,this,iterateSymbol,[v,k]);
         }
         else{
             childNodeArray[k].forEach((node)=>{
                 debugger;
                 if(node.$store instanceof Store){
-                    node.$store.dispatch(iterateSymbol,v);
+                    node.$store.dispatch(iterateSymbol,[v,k]);
                 }
             })
         }
@@ -91,8 +91,9 @@ export default class VSLoop extends VSElement{
             node.remove();
         });
         // dispatch new generate and cached
-        iterateAsArray.forEach((v)=>{
-            VSEventCore.dispatchChild(assignedElements,root.host,iterateSymbol,v)
+        iterateAsArray.forEach((v,k)=>{
+            debugger;
+            VSEventCore.dispatchChild(assignedElements,root.host,iterateSymbol,[v,k]);
         });
         $store.attach("start",limitChange.bind(this,assignedElements,"start"));
         $store.attach("total",limitChange.bind(this,assignedElements,"total"));
