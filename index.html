@@ -23,12 +23,18 @@
 	</style>
 </head>
 <body>
-	<vs-loop total="5" start="1">
-		<!-- <vs-if cond="value % 2  === 0"> -->
+	<!-- <vs-loop total="5" start="1">
+		<vs-if cond="value % 2  === 0">
 			<custom-counter></custom-counter>
 			<custom-counter></custom-counter>
-		<!-- </vs-if> -->
-	</vs-loop>
+		</vs-if>
+	</vs-loop> -->
+	<vs-loop as="[1,2,3,4]">
+			<vs-if cond="value % 2  === 0">
+				<custom-counter></custom-counter>
+				<custom-counter></custom-counter>
+			</vs-if>
+		</vs-loop>
 	
 </body>
 </html>

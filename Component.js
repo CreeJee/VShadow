@@ -45,9 +45,6 @@ const VShadow = (()=>{
             }
             remove(){
                 this.parent.$store.delete(this);
-                this.$store = null;
-                this.root = null;
-                this.parent = null;
                 super.remove();
             }
         };
