@@ -5,11 +5,10 @@ export default class CustomList extends VSElement{
     constructor(baseElement){
         super(baseElement);
         this.$store.count = 0;
-        this.$store.attach(VSLoop.iterateSymbol,(oldVal,newVal)=>{
-            debugger;
-            this.$store.dispatch("count",parseInt(newVal));
+        this.$store.attach(VSLoop.iterateSymbol,([v,k])=>{
+            this.$store.dispatch("count",parseInt(v));
         })
-        this.$store.attach(VSIf.notSymbol,(value)=>{
+        this.$store.attach(VSIf.condSymbol,(value)=>{
             this.style.display = "none";
         })
     }
@@ -26,8 +25,8 @@ export default class CustomList extends VSElement{
         addCountTag.addEventListener("click",()=>{
             ++$store.count;
         })
-        this.$store.attach("count",(oldVal,newVal)=>{
-            countTag.innerHTML = parseInt(newVal);
+        this.$store.attach("count",([v,k])=>{
+            countTag.innerHTML = parseInt(v);
         })
     }
     //on dom attached

@@ -4,13 +4,12 @@ import Store from "./core/store.js";
 import {getRelativeUrl} from "./core/util.js";
 
 const iterateSymbol = Symbol("@@IterateSymbol");
-const getRangeArray = (start,total)=>Array.from({ length: ((total) - start) }, (_, i) => start + (i))
+const getRangeArray = (start,total)=>Array.from({ length: ((total) - start) }, (_, i) => null)
 const getWrappedChilds = (children,renederPerElement)=>Array.from(children).reduce((accr,v,k,arr)=>(k % renederPerElement === 0 ? accr.push([v]) : accr[Math.floor(k/renederPerElement)].push(v),accr) ,[])
 const limitChange = function(assignedElements,key,value){
     let $store = this.$store;
     let start =  $store.get("start");
     let total = $store.get("total");
-    debugger;
     let renederPerElement = assignedElements.length;
     let data = null;
     // child elements wrapping for one loop Render Array
@@ -42,7 +41,6 @@ const limitChange = function(assignedElements,key,value){
         }
         else{
             childNodeArray[k].forEach((node)=>{
-                debugger;
                 if(node.$store instanceof Store){
                     node.$store.dispatch(iterateSymbol,[v,k]);
                 }
@@ -92,7 +90,6 @@ export default class VSLoop extends VSElement{
         });
         // dispatch new generate and cached
         iterateAsArray.forEach((v,k)=>{
-            debugger;
             VSEventCore.dispatchChild(assignedElements,root.host,iterateSymbol,[v,k]);
         });
         $store.attach("start",limitChange.bind(this,assignedElements,"start"));
