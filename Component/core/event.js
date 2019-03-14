@@ -2,15 +2,8 @@
 import Store from "./store.js";
 import VSElement from "./vs-element.js";
 const __dispatchNearest = (selectedNode,key,value)=>{
-    let __recursive = (node)=>{
-        if(node instanceof VSElement){
-            node.$store.dispatch(key,value);
-        }
-        else{
-            Array.from(node.children).forEach(__recursive);
-        }
-    };
-    __recursive(selectedNode,k);
+    let __recursive = (node)=> (node instanceof VSElement) ? node.$store.dispatch(key,value) : Array.from(node.children).forEach(__recursive);
+    return __recursive(selectedNode);
 }
 const _inserthNode = (appendHost,isInsert,key,value,node,k)=>{
     
