@@ -51,6 +51,10 @@ export default class Store extends Map{
         this.children.push(child);
         return child;
     }
+    dispatchChild(k,v){
+        this.children.forEach((_,store)=>store.dispatch(k,v));
+        return this;
+    }
     removeChild(o){
         let index = this.children.indexOf(o);
         let cond = index >= 0;
