@@ -52,7 +52,7 @@ export default class Store extends Map{
         return child;
     }
     dispatchChild(k,v){
-        this.children.forEach((_,store)=>store.dispatch(k,v));
+        this.children.forEach((store)=>store.dispatch(k,v));
         return this;
     }
     removeChild(o){
