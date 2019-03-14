@@ -21,18 +21,19 @@ function VSElement(superConstructor = HTMLElement){
         async VShadow(...args){
             return Promise.reject(new Error(`need implements [async ${this.name}.VShadow()]`));
         }
-        async promiseEvent(selector,type){
+        async promiseEvent(type,selector){
             return new Promise((resolve,reject)=>{
                 let result = Array.from(this.querySelectorAll(selector));
                 if(result.length === 0){
                     reject();
                 }
+                // TODO : change tree travel
                 result.forEach((node)=>node.addEventListener(type,function(e){
                     resolve(e);
                 }))
             })
         }
-        async delegatedPromiseEvent(selector,type){
+        async delegatedPromiseEvent(type,selector){
             return new Promise((resolve,reject)=>{
                 this.addEventListener(type,(e)=>{
                     if(Array.from(this.querySelectorAll(selector)).includes(e.target)){
