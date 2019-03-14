@@ -21,25 +21,29 @@ function VSElement(superConstructor = HTMLElement){
         async VShadow(...args){
             return Promise.reject(new Error(`need implements [async ${this.name}.VShadow()]`));
         }
+        on(type,selector,resolve,reject=()=>{}){
+            let result = Array.from(this.querySelectorAll(selector));
+            if(result.length === 0){
+                reject();
+            }
+            result.forEach((node)=>node.addEventListener(type,resolve))
+            // TODO : change tree travel
+        }
+        delegatedOn(type,selector,resolve,reject=()=>{}){
+            this.addEventListener(type,(e)=>{
+                if(Array.from(this.querySelectorAll(selector)).includes(e.target)){
+                    resolve(e);
+                }
+            })
+        }
         async promiseEvent(type,selector){
             return new Promise((resolve,reject)=>{
-                let result = Array.from(this.querySelectorAll(selector));
-                if(result.length === 0){
-                    reject();
-                }
-                // TODO : change tree travel
-                result.forEach((node)=>node.addEventListener(type,function(e){
-                    resolve(e);
-                }))
+                this.on(type,selector,resolve,reject);
             })
         }
         async delegatedPromiseEvent(type,selector){
             return new Promise((resolve,reject)=>{
-                this.addEventListener(type,(e)=>{
-                    if(Array.from(this.querySelectorAll(selector)).includes(e.target)){
-                        resolve(e);
-                    }
-                })
+                this.delegatedOn(type,selector,resolve,reject);
             })
         }
 
