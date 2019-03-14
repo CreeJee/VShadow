@@ -29,7 +29,7 @@ function VSElement(superConstructor = HTMLElement){
             result.forEach((node)=>node.addEventListener(type,resolve))
             // TODO : change tree travel
         }
-        delegatedOn(type,selector,resolve,reject=()=>{}){
+        onDelegate(type,selector,resolve,reject=()=>{}){
             this.addEventListener(type,(e)=>{
                 if(Array.from(this.querySelectorAll(selector)).includes(e.target)){
                     resolve(e);
@@ -43,7 +43,7 @@ function VSElement(superConstructor = HTMLElement){
         }
         async delegatedPromiseEvent(type,selector){
             return new Promise((resolve,reject)=>{
-                this.delegatedOn(type,selector,resolve,reject);
+                this.onDelegate(type,selector,resolve,reject);
             })
         }
 
