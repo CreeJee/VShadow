@@ -6,7 +6,7 @@ const __travelNode = (selectedNode,findCallback)=>{
     return __recursive(selectedNode);
 }
 const __dispatchNearest = (selectedNode,key,value)=>{
-    return __travelNode(selectedNode,(node)=>node.dispatch(key,value));
+    return __travelNode(selectedNode,(node)=>node.$store.dispatch(key,value));
 }
 const __inserthNode = (appendHost,isInsert,key,value,node,k)=>{
     
