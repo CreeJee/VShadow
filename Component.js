@@ -35,11 +35,13 @@ const VShadow = (()=>{
                         this.$store
                     );
                     super.isReady = true;
-                    super.connectedCallback();
+                    if(super.connectedCallback instanceof Function){
+                        super.connectedCallback();
+                    }
                 })();
             }
             attributeChangedCallback(key,oldVal,newVal){
-                if(this.isReady){
+                if(this.isReady && super.attributeChangedCallback instanceof Function){
                     super.attributeChangedCallback(key,oldVal,newVal);
                 }
             }
