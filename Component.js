@@ -44,7 +44,9 @@ const VShadow = (()=>{
                 }
             }
             disconnectedCallback(){
-                super.disconnectedCallback();
+                if(super.disconnectedCallback instanceof Function){
+                    super.disconnectedCallback();
+                }
                 let $child = this.parent.$store.children;
                 let index = $child.indexOf(this.$store);
                 if(index >= 0){
