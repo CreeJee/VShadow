@@ -8,7 +8,7 @@ const __dispatchNearest = (selectedNode,key,value)=>{
 const _inserthNode = (appendHost,isInsert,key,value,node,k)=>{
     
     let selectedNode =  isInsert ? appendHost.appendChild(node.cloneNode(true)) : appendHost.children[k];
-    __dispatchNearest(selectedNode)
+    __dispatchNearest(selectedNode,key,value);
 };
 export default {
     dispatchAppend : (assignedElements,appendHost,k,v,isInsert = true)=>{
