@@ -27,7 +27,7 @@ export default class Store extends Map{
     }
     merge(store,isIgnore){
         if(store instanceof this.constructor){
-            for(obj [k,v] of store.entries()){
+            for(let [k,v] of store.entries()){
                 if(this.has(k) && isIgnore){
                     continue;
                 }
