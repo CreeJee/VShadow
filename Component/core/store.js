@@ -9,13 +9,21 @@ const lazyObserveSymbol = Symbol("@@lazyDispatchObserveAction");
 */
 let _Store = null;
 export default class Store extends Map{
-    constructor(){
+    constructor(clonedObj){
         super();
         // Store get,set proxy
         return new Proxy(this,{
             set : (obj,prop,value)=>(obj.dispatch(prop,value,obj),true),
             get : (obj,prop)=>prop in this ? this[prop] instanceof Function ? this[prop].bind(this) : this[prop] : obj.get(prop)
         })
+    }
+    clone(){
+        // TODO : deep clone support
+        let temp = new Store();
+        for(obj [k,v] of this.entries()){
+            temp.set(k,v);
+        }
+        return temp;
     }
     get children(){
         return this.init(childSymbol,[]);
