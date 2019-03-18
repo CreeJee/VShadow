@@ -90,6 +90,7 @@ export default class VSLoop extends VSElement{
         });
         // dispatch new generate and cached
         iterateAsArray.forEach((v,k)=>{
+            debugger;
             VSEventCore.dispatchAppend(assignedElements,root.host,iterateSymbol,[v,k]);
         });
         $store.attach("start",limitChange.bind(this,assignedElements,"start"));

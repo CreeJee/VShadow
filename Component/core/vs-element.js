@@ -36,17 +36,16 @@ function VSElement(superConstructor = HTMLElement){
                 }
             })
         }
-        async promiseEvent(type,selector){
+        async one(type,selector){
             return new Promise((resolve,reject)=>{
                 this.on(type,selector,resolve,reject);
             })
         }
-        async delegatedPromiseEvent(type,selector){
+        async oneDelegate(type,selector){
             return new Promise((resolve,reject)=>{
                 this.onDelegate(type,selector,resolve,reject);
             })
         }
-
     }
 };
 export default VSElement();
