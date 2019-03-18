@@ -25,6 +25,19 @@ export default class Store extends Map{
         }
         return temp;
     }
+    merge(store,isIgnore){
+        if(store instanceof this.constructor){
+            for(obj [k,v] of store.entries()){
+                if(this.has(k) && isIgnore){
+                    continue;
+                }
+                this.set(k,v);
+            }
+        }
+        else{
+            throw new Error("only store object can merge");
+        }
+    }
     get children(){
         return this.init(childSymbol,[]);
     }
