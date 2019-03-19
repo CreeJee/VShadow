@@ -65,13 +65,15 @@ export default class Store extends Map{
         let handlers = null;
         if(handlerMap instanceof Store){
            handlers = handlerMap.get(k);
-           for(let handle of (Array.isArray(handlers) ? handlers : []))
-                if(handle(oldValue,v) === false){
+           (Array.isArray(handlers) ? handlers : []).forEach((handle)=>{
+                let res = handle(oldValue,v);
+                if(res === false){
                     break;
                 }
                 else{
-                    continue;
+                    debugger;
                 }
+            });
         }
     }
     addChild(o,child = new Store()){
