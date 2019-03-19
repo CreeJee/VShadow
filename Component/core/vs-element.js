@@ -11,9 +11,6 @@ function VSElement(superConstructor = HTMLElement){
             this.root = this.attachShadow({mode: 'open'});
             this.$store = new Store();
             this.isReady = false;
-            this.$store.attach(VSEvent.symbol,([eventName,event])=>{
-                this.parent.$store.dispatch(VSEvent.symbol,[eventName,event]);
-            });
         }
         static extend(superConstructor){
             return VSElement(superConstructor);
