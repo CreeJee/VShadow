@@ -66,7 +66,7 @@ export default class Store extends Map{
         if(handlerMap instanceof Store){
            handlers = handlerMap.get(k);
            for(let handle of (Array.isArray(handlers) ? handlers : []))
-                if(!handle(oldValue,v)){
+                if(handle(oldValue,v) === false){
                     break;
                 }
                 else{
