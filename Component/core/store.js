@@ -65,7 +65,9 @@ export default class Store extends Map{
         let handlers = null;
         if(handlerMap instanceof Store){
            handlers = handlerMap.get(k);
-           (Array.isArray(handlers) ? handlers : []).forEach((handle)=>handle(oldValue,v));
+           Promise.all(
+               (Array.isArray(handlers) ? handlers : []).map((handle)=>Promise.resolve(handle(oldValue,v)))
+           );
         }
     }
     addChild(o,child = new Store()){
