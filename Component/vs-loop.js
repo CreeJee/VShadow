@@ -29,6 +29,7 @@ const limitChange = function(assignedElements,key,value){
     }
     if(Array.isArray(data)){
         $store.set("data",data = data.slice(start,total));
+        $store.set("total",data.length);
     }
     else{
         $store.set("data",data = getRangeArray(start,total))
