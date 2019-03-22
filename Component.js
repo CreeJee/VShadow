@@ -115,7 +115,7 @@ const VShadow = (()=>{
                 const extendsTagName = ElementClass[extendsSymbol];
                 // window.customElements.whenDefined(registerdTagName).then(ElementClass.onFactory);
                 if(typeof registerdTagName === "string"  && registerdTagName.includes("-")){
-                    window.customElements.define(registerdTagName,ElementClass,extendsTagName);
+                    window.customElements.define(registerdTagName,ElementClass,extendsTagName ? {extends : extendsTagName} : undefined);
                     if (extendsTagName !== undefined) {
                         this.extendsTag[extendsTagName] = ElementClass;
                     }
