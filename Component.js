@@ -100,6 +100,9 @@ const VShadow = (()=>{
                 this.extendsTag = {};
                 return Object.freeze(this);
             }
+            isDefined(classObj){
+                return !!window.customElements.get(classObj[tagNameSymbol]);
+            }
             /**
              *bind elementClass to customElements
              *
