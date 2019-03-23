@@ -15,8 +15,7 @@ const VShadow = (()=>{
         Store = (await import("./Component/core/store.js")).default;
         // RootStore
         //non - safe but side effect
-        _Store = ROOT_HTML.$store = Store.root;
-        onLoad.apply(VShadow,[_Store]);
+        onLoad.apply(VShadow,[ROOT_HTML.$store = Store.root]);
     })()
     /**
      * @param  {HTMLElement} anyHtmlClass [description]

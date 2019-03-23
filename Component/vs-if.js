@@ -38,8 +38,10 @@ export default class VSif extends VSElement{
         const attributes = root.host.attributes;
         const slots = root.getElementById("slot");
         if(!isDispatched){ 
-            let cond = (attributes.cond ? !!VSEventCore.parseExpression(this.parent,attributes.cond.value) : false)
-            _dispatch(this,$store);
+            let cond = (attributes.cond ? !!VSEventCore.parseExpression(this,attributes.cond.value) : false);
+            if(cond){
+                _dispatch(this,$store);
+            }
         }
 
     }

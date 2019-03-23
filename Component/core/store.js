@@ -3,8 +3,6 @@ const childSymbol = Symbol("@@child");
 const observeSymbol = Symbol("@@dispatchObserveAction");
 const lazyObserveSymbol = Symbol("@@lazyDispatchObserveAction");
 
-// @TODO : Array method to Promise
-
 /**
 * component store storage
 * @type {Map}

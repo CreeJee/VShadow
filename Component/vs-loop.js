@@ -3,6 +3,8 @@ import VSElement from "./core/vs-element.js";
 import Store from "./core/store.js";
 import {getRelativeUrl} from "./core/util.js";
 
+// store attach iterate symbol to slot tag
+// https://alligator.io/web-components/composing-slots-named-slots/
 const iterateSymbol = Symbol("@@IterateSymbol");
 const getRangeArray = (start,total)=>Array.from({ length: ((total) - start) }, (_, i) => ({}) )
 const getWrappedChilds = (children,renederPerElement)=>Array.from(children).reduce((accr,v,k,arr)=>(k % renederPerElement === 0 ? accr.push([v]) : accr[Math.floor(k/renederPerElement)].push(v),accr) ,[])
