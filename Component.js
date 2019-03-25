@@ -26,7 +26,11 @@ const VShadow = (()=>{
         const classObj = class BaseComponent extends anyHtmlClass{
             // private clone util
             [assignClone](oldNode,newNode,deep){
-                newNode.$store = new Store(deep ? oldNode.$store : undefined);
+                newNode.$store = new Store();
+                if(deep){
+                    newNode.$store.merge(oldNode.$store);
+                    newNode.$store.children.splice(0);
+                }
                 newNode.parent = oldNode.parent;
                 newNode.isReady = newNode.isReady;
                 return newNode;
