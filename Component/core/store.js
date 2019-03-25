@@ -25,10 +25,10 @@ export default class Store extends Map{
         }
         return temp;
     }
-    merge(store,isIgnore){
+    merge(store,isIgnore = false){
         if(store instanceof this.constructor){
             for(let [k,v] of store.entries()){
-                if(this.has(k) && isIgnore){
+                if(this.has(k) && !isIgnore){
                     continue;
                 }
                 this.set(k,v);
