@@ -64,10 +64,10 @@ export default class Store extends Map{
         const handlerMap = this.get(observeSymbol);
         let handlers = null;
         if(handlerMap instanceof Store){
-           handlers = handlerMap.get(k);
-           Promise.all(
-               (Array.isArray(handlers) ? handlers : []).map((handle)=>Promise.resolve(handle(oldValue,v)))
-           );
+            handlers = handlerMap.get(k);
+            for(let handlers of (Array.isArray(handlers) ? handlers : [])){
+                handle(oldValue,v)
+            }
         }
     }
     addChild(o,child = new Store()){
