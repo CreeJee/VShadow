@@ -101,7 +101,7 @@ export default class Store extends Map{
         if(nonHandler.length > 0){
             throw new Error(`is't compatible at [${nonHandler.join(",")}}]`)
         }
-        Array.isArray(observeHandlers) ?  observeHandlers.concat(action) : observeStore.set(prop,action);
+        observeStore.set(prop,(Array.isArray(observeHandlers) ?  observeHandlers : []).concat(action));
         if((lazyStore = this.get(lazyObserveSymbol)) instanceof Store && (tempValue = lazyStore.get(prop))){
             this.commit(prop,tempValue,lazyStore);
         }
