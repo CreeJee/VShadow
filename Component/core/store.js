@@ -20,7 +20,7 @@ export default class Store extends Map{
     clone(){
         // TODO : deep clone support
         let temp = new Store();
-        for(obj [k,v] of this.entries()){
+        for(let [k,v] of this.entries()){
             temp.set(k,v);
         }
         return temp;
