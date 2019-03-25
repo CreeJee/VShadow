@@ -62,11 +62,10 @@ export default class Store extends Map{
     commit(k,v,store=this){
         const oldValue = store.get(k);
         const handlerMap = this.get(observeSymbol);
-        let handlers = null;
         if(handlerMap instanceof Store){
-            handlers = handlerMap.get(k);
-            for(let handlers of (Array.isArray(handlers) ? handlers : [])){
-                handle(oldValue,v)
+            let handlers = handlerMap.get(k);
+            for(let handler of (Array.isArray(handlers) ? handlers : [])){
+                handler(oldValue,v)
             }
         }
     }
