@@ -9,8 +9,8 @@ const lazyObserveSymbol = Symbol("@@lazyDispatchObserveAction");
 */
 let _Store = null;
 export default class Store extends Map{
-    constructor(){
-        super();
+    constructor(...args){
+        super(...args);
         // Store get,set proxy
         return new Proxy(this,{
             set : (obj,prop,value)=>(obj.dispatch(prop,value,obj),true),
