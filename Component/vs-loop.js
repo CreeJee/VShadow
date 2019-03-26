@@ -44,7 +44,7 @@ const limitChange = function(assignedElements,key,value){
             VSEventCore.dispatchAppend(assignedElements,this,iterateSymbol,[v,k]);
         }
         else{
-            childNodeArray[k].forEach((node)=>{
+            selectedChild.forEach((node)=>{
                 if(node.$store instanceof Store){
                     node.$store.dispatch(iterateSymbol,[v,k]);
                 }
