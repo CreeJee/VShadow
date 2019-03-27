@@ -72,7 +72,7 @@ export default class Store extends Map{
             let iterator = (Array.isArray(handlers) ? handlers : [])[Symbol.iterator]();
             let next = null;
             while(!(next = iterator.next()).done){
-                handler(oldValue,next.value)
+                next.value(oldValue,v);
             }
         }
     }
