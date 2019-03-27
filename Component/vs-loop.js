@@ -13,7 +13,7 @@ const limitChange = function(assignedElements,key,value){
     let start =  $store.get("start");
     let total = $store.get("total");
     let renederPerElement = assignedElements.length;
-    let data = null;
+    let data = $store.get("data");
     // child elements wrapping for one loop Render Array
     // for example
     /*  
@@ -31,7 +31,8 @@ const limitChange = function(assignedElements,key,value){
         $store.set("total",data.length);
     }
     if(Array.isArray(data)){
-        $store.set("data",data = data.slice(start,total));
+        let len = data.length;
+        $store.set("data",data = (len >= total ? data.slice(start,total) : data.concat( getRangeArray(0,total-len) )));
         $store.set("total",data.length);
     }
     else{
