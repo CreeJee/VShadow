@@ -1,4 +1,4 @@
-
+// TODO : Store들을 async하게 바꾸기
 const childSymbol = Symbol("@@child");
 const observeSymbol = Symbol("@@dispatchObserveAction");
 const lazyObserveSymbol = Symbol("@@lazyDispatchObserveAction");
@@ -20,14 +20,19 @@ export default class Store extends Map{
     clone(){
         // TODO : deep clone support
         let temp = new Store();
-        for(let [k,v] of this.entries()){
-            temp.set(k,v);
+        let iterator = this.entries();
+        let next = null;
+        while(!(next = iterator.next()).done){
+            temp.set.apply(temp,next.value);
         }
         return temp;
     }
     merge(store,isIgnore = false){
         if(store instanceof this.constructor){
-            for(let [k,v] of store.entries()){
+            let iterator = store.entries();
+            let next = null;
+            while(!(next = iterator.next()).done){
+                let [k,v] = next.value;
                 if(this.has(k) && !isIgnore){
                     continue;
                 }
@@ -64,8 +69,10 @@ export default class Store extends Map{
         const handlerMap = this.get(observeSymbol);
         if(handlerMap instanceof Store){
             let handlers = handlerMap.get(k);
-            for(let handler of (Array.isArray(handlers) ? handlers : [])){
-                handler(oldValue,v)
+            let iterator = (Array.isArray(handlers) ? handlers : [])[Symbol.iterator]();
+            let next = null;
+            while(!(next = iterator.next()).done){
+                handler(oldValue,next.value)
             }
         }
     }
@@ -74,7 +81,11 @@ export default class Store extends Map{
         return child;
     }
     dispatchChild(k,v){
-        this.children.forEach((store)=>store.dispatch(k,v));
+        let iterator = this.children[Symbol.iterator]();
+        while(!iterator.next().done){
+            iterator.next()
+            store.dispatch(k,v);
+        }
         return this;
     }
     removeChild(o){
