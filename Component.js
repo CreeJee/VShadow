@@ -27,16 +27,18 @@ const VShadow = (()=>{
             // private clone util
             [assignClone](oldNode,newNode,deep){
                 newNode.$store = new Store();
-                let generatedNode = new (newNode.constructor.bind(newNode))();
                 if(deep){
-                    (async ()=>{
-                        Array.from(newNode.children).forEach(n=>generatedNode.appendChild(n));
-                        await generatedNode.VShadow(newNode.root,newNode.$store);
-                    })()
+                    newNode.$store.merge(oldNode.$store);
+                    newNode.$store.children.splice(0);
+                    // Array.from(newNode.$store.entries()).filter(([k,v])=>typeof k !== "symbol").forEach(([k])=>newNode.$store.delete(k));
+                    
                 }
-                generatedNode.parent = oldNode.parent;
-                generatedNode.isReady = oldNode.isReady;
-                return generatedNode;
+                (async ()=>{
+                    await newNode.VShadow(newNode.root,newNode.$store);
+                })();
+                newNode.parent = oldNode.parent;
+                newNode.isReady = newNode.isReady;
+                return newNode;
             }
             // native observe
             cloneNode(deep){

@@ -9,16 +9,15 @@ const __travelNode = (selectedNode,findCallback)=>{
 const __dispatchNearest = (selectedNode,key,value)=>{
     return __travelNode(selectedNode,(node)=>node.$store.dispatch(key,value));
 }
-const __inserthNode = (appendHost,isInsert,key,value,node,k)=>{
+const __inserthNode = (appendHost,key,value,node,k)=>{
     
-    let selectedNode =  isInsert ? appendHost.appendChild(node.cloneNode(true)) : appendHost.children[k];
+    let selectedNode =  appendHost.appendChild(node.cloneNode(true));
     __dispatchNearest(selectedNode,key,value);
 };
 export default {
-    dispatchAppend : (assignedElements,appendHost,k,v,isInsert = true)=>{
-        let childStore = appendHost.$store.children;
+    dispatchAppend : (assignedElements,appendHost,k,v)=>{
         if(Array.isArray(assignedElements)){
-            assignedElements.forEach(__inserthNode.bind(null,appendHost,isInsert,k,v));
+            assignedElements.forEach(__inserthNode.bind(null,appendHost,k,v));
         }
         else{
             throw new Error("unknown dispatch target");
