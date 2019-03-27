@@ -77,7 +77,10 @@ export default class Store extends Map{
         }
     }
     addChild(o,child = new Store()){
-        this.children.push(child);
+        if(!(o instanceof Store)){
+            o = this;
+        }
+        o.children.push(child);
         return child;
     }
     dispatchChild(k,v){

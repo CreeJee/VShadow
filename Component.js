@@ -30,6 +30,7 @@ const VShadow = (()=>{
                 if(deep){
                     newNode.$store.merge(oldNode.$store);
                     newNode.$store.children.splice(0);
+                    Array.from(newNode.$store.entries()).filter(([k,v])=>typeof k === "symbol").forEach(([k])=>newNode.$store.delete(k));
                 }
                 newNode.parent = oldNode.parent;
                 newNode.isReady = newNode.isReady;
