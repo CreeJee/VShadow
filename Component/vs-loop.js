@@ -46,6 +46,7 @@ const limitChange = function(assignedElements,key,value){
         else{
             selectedChild.forEach((node)=>{
                 if(node.$store instanceof Store){
+                    debugger;
                     node.$store.dispatch(iterateSymbol,[v,k]);
                 }
             })

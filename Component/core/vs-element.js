@@ -9,7 +9,7 @@ function VSElement(superConstructor = HTMLElement){
         constructor(){
             super();
             this.root = this.attachShadow({mode: 'open'});
-            this.$store = new Store();
+            this.$store = new Store([["self",this]]);
             this.isReady = false;
         }
         static extend(superConstructor){
