@@ -82,9 +82,9 @@ export default class Store extends Map{
     }
     dispatchChild(k,v){
         let iterator = this.children[Symbol.iterator]();
-        while(!iterator.next().done){
-            iterator.next()
-            store.dispatch(k,v);
+        let next = null;
+        while(!(next = iterator.next()).done){
+            next.value.dispatch(k,v);
         }
         return this;
     }
