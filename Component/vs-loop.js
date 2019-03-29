@@ -29,7 +29,7 @@ const limitChange = function(assignedElements,key,value){
     let childNodeArray = getWrappedChilds(this.children,renederPerElement);
     if(key === "as"){
         $store.set("as",data = value);
-        $store.set("total",data.length);
+        $store.set("total",total = data.length);
     }
     if(Array.isArray(data)){
         let len = data.length;
