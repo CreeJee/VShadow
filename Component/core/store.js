@@ -13,7 +13,8 @@ let wrapProxy = (o)=>{
         set : (obj,prop,value)=>(obj.dispatch(prop,value,obj),true),
         get : (obj,prop)=>{
             let v = Reflect.get(o,prop);
-            return prop in o ? v instanceof Function ? v.bind(this) : v : obj.get(prop)
+            debugger;
+            return prop in o ? v instanceof Function ? v.bind(o) : v : obj.get(prop)
         }
     })
 }
