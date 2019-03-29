@@ -6,6 +6,7 @@ import {getRelativeUrl} from "./core/util.js";
 // store attach iterate symbol to slot tag
 // https://alligator.io/web-components/composing-slots-named-slots/
 const iterateSymbol = Symbol("@@IterateSymbol");
+const onRenderSymbol = Symbol("@@OnRenderSymbol");
 const getRangeArray = (start,total)=>Array.from({ length: ((total) - start) }, (_, i) => ({}) )
 const getWrappedChilds = (children,renederPerElement)=>Array.from(children).reduce((accr,v,k,arr)=>(k % renederPerElement === 0 ? accr.push([v]) : accr[Math.floor(k/renederPerElement)].push(v),accr) ,[])
 const limitChange = function(assignedElements,key,value){
@@ -54,7 +55,10 @@ const limitChange = function(assignedElements,key,value){
     });
     getWrappedChilds(this.children,renederPerElement).filter((v,i)=>data[i] === undefined).flatMap((v)=>v).forEach((node)=>{
         node.remove();
-    })
+    });
+
+    
+    $store.commit(onRenderSymbol,$store);
 };
 export default class VSLoop extends VSElement{
     constructor(){
@@ -102,6 +106,8 @@ export default class VSLoop extends VSElement{
         $store.attach("total",limitChange.bind(this,assignedElements,"total"));
         $store.attach("data",limitChange.bind(this,assignedElements,"data"));
         $store.attach("as",limitChange.bind(this,assignedElements,"as"));
+
+        $store.commit(onRenderSymbol,$store);
     }
     //on dom attached
     connectedCallback(){
