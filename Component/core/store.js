@@ -8,14 +8,17 @@ const lazyObserveSymbol = Symbol("@@lazyDispatchObserveAction");
 * @type {Map}
 */
 let _Store = null;
+let wrapProxy = (o)=>{
+    return new Proxy(o,{
+        set : (obj,prop,value)=>(obj.dispatch(prop,value,obj),true),
+        get : (obj,prop)=>prop in o ? o[prop] instanceof Function ? o[prop].bind(this) : o[prop] : obj.get(prop)
+    })
+}
 export default class Store extends Map{
     constructor(base){
         super(base);
         // Store get,set proxy
-        return new Proxy(this,{
-            set : (obj,prop,value)=>(obj.dispatch(prop,value,obj),true),
-            get : (obj,prop)=>prop in this ? this[prop] instanceof Function ? this[prop].bind(this) : this[prop] : obj.get(prop)
-        })
+        return wrapProxy(this);
     }
     clone(){
         // TODO : deep clone support
