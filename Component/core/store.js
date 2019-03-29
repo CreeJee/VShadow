@@ -121,6 +121,6 @@ export default class Store extends Map{
         if((lazyStore = this.get(lazyObserveSymbol)) instanceof Store && (tempValue = lazyStore.get(prop))){
             this.commit(prop,tempValue,lazyStore);
         }
-        return this;
+        return wrapProxy(this);
     }
 }
