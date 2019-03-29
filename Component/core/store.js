@@ -11,11 +11,7 @@ let _Store = null;
 let wrapProxy = (o)=>{
     return new Proxy(o,{
         set : (obj,prop,value)=>(obj.dispatch(prop,value,obj),true),
-        get : (obj,prop)=>{
-            let v = Reflect.get(o,prop);
-            debugger;
-            return prop in o ? v instanceof Function ? v.bind(o) : v : obj.get(prop)
-        }
+        get : (obj,prop)=>prop in o ? o[prop] instanceof Function ? o[prop].bind(o) : o[prop] : obj.get(prop)
     })
 }
 export default class Store extends Map{
