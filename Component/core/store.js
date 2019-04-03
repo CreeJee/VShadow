@@ -78,7 +78,7 @@ export default class Store extends Map{
     }
     commit(k,v,store = this){
         __commit(this,k,v,store,(handlers,oldValue)=>{
-            __iterate(iterator,(handler)=>handler(oldValue,v));
+            __iterate(handlers[Symbol.iterator](),(handler)=>handler(oldValue,v));
         });
     }
     recursiveCommit(k,v,store = this){
