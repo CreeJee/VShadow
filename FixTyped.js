@@ -66,7 +66,7 @@ const FixedType = (()=>{
     const PropertyHandler = {
         set : (obj,prop,value)=>{
             try{
-                FixedType.Instance.__get(obj,prop,value);
+                FixedType.Instance.__get(obj,prop,justConstructor(value));
                 return Reflect.set(obj,prop,value);
             }
             catch(e){

@@ -29,12 +29,20 @@ function VSElement(superConstructor = HTMLElement){
             result.forEach((node)=>node.addEventListener(type,resolve))
             // TODO : change tree travel
         }
-        onDelegate(type,selector,resolve,reject=()=>{}){
+        delegate(type,cond=()=>false,resolve,reject=()=>{}){
             this.addEventListener(type,(e)=>{
-                if(Array.from(this.querySelectorAll(selector)).includes(e.target)){
+                if(cond(this,e)){
                     resolve(e);
                 }
             })
+        }
+        onDelegate(type,selector,resolve,reject){
+            return this.delegate(type,(self,e)=>Array.from(self.querySelectorAll(selector)).includes(e.target),resolve,reject)
+        }
+        //if u dom is visual but it is shadow 
+        //use this :D
+        onRoot(type,selector,resolve,reject){
+            return this.delegate(type,(self,e)=>Array.from(self.root.querySelectorAll(selector)).includes(e.path[0]),resolve,reject)
         }
         async one(type,selector){
             return new Promise((resolve,reject)=>{

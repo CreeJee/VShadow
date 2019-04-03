@@ -36,8 +36,56 @@
     - __callMiddleWare(parent extends Map<String,Map<...>>)
         - call \_\_useProps\_\_ called
     
-### how to use
+### how to use (single Property)
+    ```javascript
+    //단일타입채킹
+    class Single{
+        constructor(){
+            this.stringOnly = FixedType.expect(this.stringOnly,String);
+            return FixedType.property(this).expect("numberOnly",Number);
+        }
+        stringOnly(foo){
+            return typeof foo;
+        }
+    }
 
+    //다중타입채크
+    class MultiType{
+        constructor(){
+            this.stringOnly = FixedType.expect(this.stringOnly,String).expect(Number);
+            return FixedType.property(this).expect("numberOnly",Number)
+                                            .expect("numberOnly",String);
+        }
+        stringOnly(foo){
+            return typeof foo;
+        }
+    }
+
+    //함수 매핑태이블
+    class FunctionArgumentMatchTable{
+        constructor(){
+            this.stringOnly = FixedType.expect(this.stringOnly,String).expect(Number).expect(String,Number);
+        }
+        stringOnly(foo){
+            return typeof foo;
+        }
+        twoArguments(foo,bar){
+            
+            return [typeof foo,typeof bar];
+        }
+    }
+
+    //생성자 적용
+    let FixedTypeConstruct = FixedType.expect(class {
+        constructor(...arg){
+            console.log(...arg);
+        }
+    },String).expect(Number).expect(String,Number)
+
+    //미들웨어 적용도 가능
+
+
+    ```
 
 ##TODO 
 - template 태그를 이용한 캐싱,
