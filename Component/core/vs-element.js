@@ -42,7 +42,7 @@ function VSElement(superConstructor = HTMLElement){
         //if u dom is visual but it is shadow 
         //use this :D
         onRoot(type,selector,resolve,reject){
-            return this.delegate(type,(self,e)=>Array.from(self.root.querySelectorAll(selector)).includes(e.path[0]),resolve,reject)
+            return this.delegate(type,(self,e)=>Array.from(self.root.querySelectorAll(selector)).find((n)=>e.path.includes(n)),resolve,reject)
         }
         async one(type,selector){
             return new Promise((resolve,reject)=>{
