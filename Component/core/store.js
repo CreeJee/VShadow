@@ -3,6 +3,12 @@ const childSymbol = Symbol("@@child");
 const observeSymbol = Symbol("@@dispatchObserveAction");
 const lazyObserveSymbol = Symbol("@@lazyDispatchObserveAction");
 
+const __iterate = (iterator,on = ()=>{}) => {
+    let next = null;
+    while(!(next = iterator.next()).done){
+        on(next.value)
+    }
+}
 /**
 * component store storage
 * @type {Map}
@@ -23,24 +29,18 @@ export default class Store extends Map{
     clone(){
         // TODO : deep clone support
         let temp = new Store();
-        let iterator = this.entries();
-        let next = null;
-        while(!(next = iterator.next()).done){
-            temp.set.apply(temp,next.value);
-        }
+        __iterate(this.entries(),temp.set.bind(temp))
         return temp;
     }
     merge(store,isIgnore = false){
         if(store instanceof this.constructor){
-            let iterator = store.entries();
-            let next = null;
-            while(!(next = iterator.next()).done){
-                let [k,v] = next.value;
+            __iterate(store.entries(),([k,v])=>{
                 if(this.has(k) && !isIgnore){
                     continue;
                 }
                 this.set(k,v);
-            }
+            })
+            return this;
         }
         else{
             throw new Error("only store object can merge");
@@ -72,10 +72,10 @@ export default class Store extends Map{
         const handlerMap = this.get(observeSymbol);
         if(handlerMap instanceof Store){
             let handlers = handlerMap.get(k);
-            let iterator = (Array.isArray(handlers) ? handlers : [])[Symbol.iterator]();
-            let next = null;
-            while(!(next = iterator.next()).done){
-                next.value(oldValue,v);
+            let handlerArr = (Array.isArray(handlers) ? handlers : []);
+            let iterator = handlerArr[Symbol.iterator]();
+            if(handlerArr.length > 0){
+                __iterate(iterator,(handler)=>handler(oldValue,v))
             }
         }
     }
@@ -87,11 +87,7 @@ export default class Store extends Map{
         return child;
     }
     dispatchChild(k,v){
-        let iterator = this.children[Symbol.iterator]();
-        let next = null;
-        while(!(next = iterator.next()).done){
-            next.value.dispatch(k,v);
-        }
+        __iterate(this.children[Symbol.iterator](),($store)=>$store.dispatch(k,v));
         return this;
     }
     removeChild(o){
@@ -105,7 +101,7 @@ export default class Store extends Map{
     init(o,v = new Store()){
         return (!this.has(o)) ? (this.set(o,v),v) : this.get(o);
     }
-    hasChildren(o){
+    hasChild(o){
         return this.children.includes(o);
     }
     attach(prop,...action){
