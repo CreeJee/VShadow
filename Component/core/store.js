@@ -77,7 +77,7 @@ export default class Store extends Map{
        return v;
     }
     commit(k,v,store = this){
-        __commit(this,k,v,scope,(handlers,oldValue)=>{
+        __commit(this,k,v,store,(handlers,oldValue)=>{
             __iterate(iterator,(handler)=>handler(oldValue,v));
         });
     }
