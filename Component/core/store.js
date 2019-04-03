@@ -9,15 +9,6 @@ const __iterate = (iterator,on = ()=>{}) => {
         on(next.value)
     }
 }
-const __commit = (scope,k,v,store = this,commitAction = ()=>{})=>{
-    const oldValue = store.get(k);
-    const handlerMap = scope.get(observeSymbol);
-    if(handlerMap instanceof Store){
-        let handlers = handlerMap.get(k);
-        let handlerArr = (Array.isArray(handlers) ? handlers : []);
-        commitAction(handlerArr,oldValue);
-    }
-}
 /**
 * component store storage
 * @type {Map}
@@ -76,20 +67,23 @@ export default class Store extends Map{
        this.commit(k,v);
        return v;
     }
-    commit(k,v,store = this){
-        __commit(this,k,v,store,(handlers,oldValue)=>{
-            __iterate(handlers[Symbol.iterator](),(handler)=>handler(oldValue,v));
-        });
+    commit(k,v,store = this,commitAction){
+        const oldValue = store.get(k);
+        const handlerMap = this.get(observeSymbol);
+        if(handlerMap instanceof Store){
+            let handlers = handlerMap.get(k);
+            let handlerArr = (Array.isArray(handlers) ? handlers : []);
+            let iterator = handlerArr[Symbol.iterator]();
+            if(!commitAction){
+                __iterate(iterator,(handler)=>handler(oldValue,v))
+            }
+        }
     }
-    recursiveCommit(k,v,store = this){
+    recursiveCommit(k,v){
         let childs = this.children;
-        __commit(this,k,v,store,(handlers,oldValue)=>{
-            if(handlers.length > 0){
-                __iterate(handlers[Symbol.iterator](),(handler)=>handler(oldValue,v))
-            }
-            else if(childs.length > 0){
-                childs.forEach(($s)=>$s.recursiveCommit(k,v,$s))
-            }
+        childs.forEach(($s)=>{
+            $s.commit(k,v);
+            $s.recursiveCommit(k,v);
         })
     }
     addChild(o,child = new Store()){
