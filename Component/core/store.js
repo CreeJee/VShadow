@@ -81,7 +81,7 @@ export default class Store extends Map{
     }
     recursiveCommit(k,v){
         let childs = this.children;
-        childs.forEach(($s)=>{
+        __iterate(childs[Symbol.iterator](),($s)=>{
             $s.commit(k,v);
             $s.recursiveCommit(k,v);
         })
