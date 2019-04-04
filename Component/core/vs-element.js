@@ -1,6 +1,10 @@
 import Store from "./store.js";
 import VSEvent from "./event.js";
 const $root = Store.root;
+const __delegate = (selector,isRoot,self,e)=>{
+    let path = e.path;
+    Array.from((isRoot ? self.root : self).querySelectorAll(selector)).find((n)=>path.slice(0,path.indexOf(self)).includes(n))
+}
 function VSElement(superConstructor = HTMLElement){
     if(!(Object.getPrototypeOf(superConstructor) === HTMLElement || superConstructor === HTMLElement)){
         throw new Error("need extends HTMLElement");
@@ -36,13 +40,14 @@ function VSElement(superConstructor = HTMLElement){
                 }
             })
         }
+        
         onDelegate(type,selector,resolve,reject){
-            return this.delegate(type,(self,e)=>Array.from(self.querySelectorAll(selector)).includes(e.target),resolve,reject)
+            return this.delegate(type,__delegate.bind(null,selector,false),resolve,reject)
         }
         //if u dom is visual but it is shadow 
         //use this :D
         onRoot(type,selector,resolve,reject){
-            return this.delegate(type,(self,e)=>Array.from(self.root.querySelectorAll(selector)).find((n)=>e.path.includes(n)),resolve,reject)
+            return this.delegate(type,__delegate.bind(null,selector,true),resolve,reject)
         }
         async one(type,selector){
             return new Promise((resolve,reject)=>{
