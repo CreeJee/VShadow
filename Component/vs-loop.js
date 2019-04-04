@@ -82,6 +82,9 @@ const VSLoopGen = (superClass) => class VSLoop extends VSElement.extend(superCla
     static extend(superClass){
         return VSLoopGen(superClass);
     }
+    static [Symbol.hasInstance](instance){
+        debugger;
+    }
     async VShadow(root,$store){
         const attributes = this.attributes;
         const assignedElements = (this.isShadow) ? root.querySelector("#slot").assignedElements() : Array.from(this.children);
