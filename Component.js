@@ -47,25 +47,6 @@ const VShadow = (()=>{
             
             connectedCallback(){
                 (async ()=>{
-                    try{
-                        this.root = this.attachShadow({mode: 'open'});
-                        this.root.innerHTML = await classObj.template;
-                        this.isShadow = true;
-                    }
-                    catch(e){
-                        /*
-                            TODO : 
-                                root와 host는 document-fragment로 최적화를 손보자
-                                document fragment 가 안될경우 모든셀렉터를 프록시와 querySelector를 이용해서 시뮬레이션 
-                                모든 내부 디펜전시는 querySelector로 통일
-                        */
-                        let temp = document.createElement("template");
-                        temp.innerHTML = await classObj.template;
-                        this.root = temp.content;
-                        this.root.host = this;
-                        this.isShadow = false;
-                        this.appendChild(this.root);
-                    }
                     this.parent = _getParent(this.parentNode);
                     this.parent.$store.addChild(this,this.$store);
                     this.VShadow(
