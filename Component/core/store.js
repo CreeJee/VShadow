@@ -23,6 +23,8 @@ let wrapProxy = (o)=>{
 export default class Store extends Map{
     constructor(base){
         super(base);
+        this.parent = null;
+        this.children = [];
         // Store get,set proxy
         return wrapProxy(this);
     }
@@ -79,17 +81,26 @@ export default class Store extends Map{
             }
         }
     }
-    recursiveCommit(k,v){
-        let childs = this.children;
+    commitParents(k,v,store = this){
+        if(store !== this){
+            store.commit(k,v);
+        }
+        if(store === this.root){
+            return this;
+        }
+        this.commitParents(k,v,store.parent);
+    }
+    commitChilds(k,v){
         __iterate(childs[Symbol.iterator](),($s)=>{
             $s.commit(k,v);
-            $s.recursiveCommit(k,v);
+            $s.commitChilds(k,v);
         })
     }
     addChild(o,child = new Store()){
         if(!(o instanceof Store)){
             o = this;
         }
+        child.parent = o;
         o.children.push(child);
         return child;
     }
