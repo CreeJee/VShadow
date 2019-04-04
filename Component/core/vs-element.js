@@ -3,7 +3,7 @@ import VSEvent from "./event.js";
 const $root = Store.root;
 const __delegate = (selector,isRoot,self,e)=>{
     let path = e.path;
-    Array.from((isRoot ? self.root : self).querySelectorAll(selector)).find((n)=>path.slice(0,path.indexOf(self)).includes(n))
+    return Array.from((isRoot ? self.root : self).querySelectorAll(selector)).find((n)=>path.slice(0,path.indexOf(self)).includes(n))
 }
 function VSElement(superConstructor = HTMLElement){
     if(!(Object.getPrototypeOf(superConstructor) === HTMLElement || superConstructor === HTMLElement)){
