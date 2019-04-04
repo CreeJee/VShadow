@@ -12,7 +12,12 @@ function VSElement(superConstructor = HTMLElement){
     return class __VSElement__ extends superConstructor{
         constructor(){
             super();
-            this.root = this.attachShadow({mode: 'open'});
+            try{
+                this.root = this.attachShadow({mode: 'open'});
+            }
+            catch(e){
+                this.root = this;
+            }
             this.$store = new Store([["self",this]]);
             this.isReady = false;
         }
