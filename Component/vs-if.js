@@ -39,7 +39,6 @@ const VSIfGen = (superClass) => class VSif extends VSElement.extend(superClass){
     }
     async VShadow(root,$store){
         const attributes = root.host.attributes;
-        const slots = root.getElementById("slot");
         if(!isDispatched){ 
             let cond = (attributes.cond ? !!VSEventCore.parseExpression(this,attributes.cond.value) : false);
             if(cond){
