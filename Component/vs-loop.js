@@ -60,9 +60,9 @@ const limitChange = function(assignedElements,key,value){
     
     $store.commit(onRenderSymbol,$store);
 };
-export default class VSLoop extends VSElement{
-    constructor(baseElement){
-        super(baseElement);
+const VSLoopGen = (superClass) => class VSLoop extends VSElement.extend(superClass){
+    constructor(){
+        super();
     }
     static get template(){
         return fetch(`${getRelativeUrl(import.meta.url)}/dom/base/vs-loop.html`).then((res)=>res.text());
@@ -78,6 +78,9 @@ export default class VSLoop extends VSElement{
     }
     static get onRenderSymbol(){
         return onRenderSymbol;
+    }
+    static extend(superClass){
+        return VSLoopGen(superClass);
     }
     async VShadow(root,$store){
         const attributes = root.host.attributes;
@@ -129,3 +132,4 @@ export default class VSLoop extends VSElement{
 
     }
 }
+export default VSLoopGen(HTMLElement);

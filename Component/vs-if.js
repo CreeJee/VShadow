@@ -16,9 +16,9 @@ const _dispatch = (self,[val,key])=>{
         $store.dispatch(condSymbol,[cond,val,key]);
     })
 }
-export default class VSif extends VSElement{
-    constructor(baseElement){
-        super(baseElement);
+const VSIfGen = (superClass) => class VSif extends VSElement.extend(superClass){
+    constructor(){
+        super();
         this[isDispatched] = false;
         this.$store.attach(VSLoop.iterateSymbol,(oldVal,newVal)=>{
             this[isDispatched] = true;
@@ -33,6 +33,9 @@ export default class VSif extends VSElement{
     }
     static get [VShadow.tagNameSymbol](){
         return "vs-if";
+    }
+    static extend(superClass){
+        return VSIfGen(superClass);
     }
     async VShadow(root,$store){
         const attributes = root.host.attributes;
@@ -61,3 +64,4 @@ export default class VSif extends VSElement{
 
     }
 }
+export default VSIfGen(HTMLElement);
