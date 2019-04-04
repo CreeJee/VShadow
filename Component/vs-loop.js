@@ -98,7 +98,6 @@ const VSLoopGen = (superClass) => class VSLoop extends VSElement.extend(superCla
         catch(e){
             throw new Error(`undefined variable on [${attributes.as.value}]`);
         }
-        debugger;
         
         assignedElements.forEach((node)=>{
             node.remove();

@@ -62,6 +62,7 @@ const VShadow = (()=>{
                         this.root = temp.content;
                         this.root.host = this;
                         this.isShadow = false;
+                        this.appendChild(this.root);
                     }
                     this.parent = _getParent(this.parentNode);
                     this.parent.$store.addChild(this,this.$store);
