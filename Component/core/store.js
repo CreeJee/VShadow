@@ -29,7 +29,7 @@ export default class Store extends Map{
     clone(){
         // TODO : deep clone support
         let temp = new Store();
-        __iterate(this.entries(),temp.set.bind(temp))
+        __iterate(this.entries(),(v)=>temp.set(...v))
         return temp;
     }
     merge(store,isIgnore = false){
