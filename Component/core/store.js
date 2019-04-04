@@ -94,6 +94,7 @@ export default class Store extends Map{
         this.commitParents(k,v,store[parentSymbol]);
     }
     commitChilds(k,v){
+        let childs = this.children;
         __iterate(childs[Symbol.iterator](),($s)=>{
             $s.commit(k,v);
             $s.commitChilds(k,v);
