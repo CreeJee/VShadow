@@ -1,5 +1,6 @@
 import Store from "./store.js";
 import VSEvent from "./event.js";
+const notShadowSymbol = Symbol("@@notShadow");
 const $root = Store.root;
 const __delegate = (selector,isRoot,self,e)=>{
     let path = e.path;
@@ -16,7 +17,10 @@ function VSElement(superConstructor = HTMLElement){
                 this.root = this.attachShadow({mode: 'open'});
             }
             catch(e){
+                // TODO root와 host는 document-fragment로 최적화를 손보자
                 this.root = this;
+                this.root.host = this;
+                this[notShadowSymbol] = true;
             }
             this.$store = new Store([["self",this]]);
             this.isReady = false;
@@ -26,6 +30,9 @@ function VSElement(superConstructor = HTMLElement){
         }
         static get template(){
             return Promise.reject(new Error(`need implements [${this.name}.template]`));
+        }
+        static get notShadowSymbol(){
+            return notShadowSymbol;
         }
         async VShadow(...args){
             return Promise.reject(new Error(`need implements [async ${this.name}.VShadow()]`));
