@@ -13,20 +13,6 @@ function VSElement(superConstructor = HTMLElement){
     return class __VSElement__ extends superConstructor{
         constructor(){
             super();
-            try{
-                this.root = this.attachShadow({mode: 'open'});
-            }
-            catch(e){
-                /*
-                    TODO : 
-                        root와 host는 document-fragment로 최적화를 손보자
-                        document fragment 가 안될경우 모든셀렉터를 프록시와 querySelector를 이용해서 시뮬레이션 
-                        모든 내부 디펜전시는 querySelector로 통일
-                */
-                this.root = this;
-                this.root.host = this;
-                this[notShadowSymbol] = true;
-            }
             this.$store = new Store([["self",this]]);
             this.isReady = false;
         }
