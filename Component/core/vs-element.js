@@ -1,6 +1,5 @@
 import Store from "./store.js";
-import VSEvent from "./event.js";
-const notShadowSymbol = Symbol("@@notShadow");
+import VSEvent from "./event.js";=
 const $root = Store.root;
 const __delegate = (selector,isRoot,self,e)=>{
     let path = e.path;
@@ -21,9 +20,6 @@ function VSElement(superConstructor = HTMLElement){
         }
         static get template(){
             return Promise.reject(new Error(`need implements [${this.name}.template]`));
-        }
-        static get notShadowSymbol(){
-            return notShadowSymbol;
         }
         async VShadow(...args){
             return Promise.reject(new Error(`need implements [async ${this.name}.VShadow()]`));

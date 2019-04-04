@@ -48,6 +48,7 @@ const VShadow = (()=>{
                     try{
                         this.root = this.attachShadow({mode: 'open'});
                         this.root.innerHTML = await classObj.template;
+                        this.isShadow = true;
                     }
                     catch(e){
                         /*
@@ -60,7 +61,7 @@ const VShadow = (()=>{
                         temp.innerHTML = await classObj.template;
                         this.root = temp.content;
                         this.root.host = this;
-                        this[notShadowSymbol] = true;
+                        this.isShadow = false;
                     }
                     this.parent = _getParent(this.parentNode);
                     this.parent.$store.addChild(this,this.$store);
@@ -182,7 +183,7 @@ const VShadow = (()=>{
                     if (options.is !== undefined) {
                         console.warn("it will ignored options [key : \"is\"]");
                     }
-                    Object.assign(options,{is :extendsTag[extendsTagName]})
+                    Object.assign(options,{is : extendsTag[extendsTagName]})
                 }
                 return document.createElement(elements,options)
                 // TODO : extendsTagName이 선언된 태그 한정으로 option재생성
