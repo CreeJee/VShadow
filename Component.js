@@ -119,12 +119,13 @@ const VShadow = (()=>{
                 const ElementClass = BaseComponent(OriginalClass);
                 const registerdTagName = ElementClass[tagNameSymbol];
                 const extendsTagName = ElementClass[extendsSymbol];
+                const customElements = window.customElements;
                 // window.customElements.whenDefined(registerdTagName).then(ElementClass.onFactory);
                 if(typeof registerdTagName === "string"  && registerdTagName.includes("-")){
-                    window.customElements.define(registerdTagName,ElementClass,extendsTagName ? {extends : extendsTagName} : undefined);
                     if (extendsTagName !== undefined) {
                         this.extendsTag[extendsTagName] = ElementClass;
                     }
+                    customElements.define(registerdTagName,ElementClass,extendsTagName ? {extends : extendsTagName} : undefined);
                     return this.definedTag[registerdTagName] = ElementClass;
                 }
                 else{
