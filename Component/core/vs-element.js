@@ -1,5 +1,5 @@
 import Store from "./store.js";
-import VSEvent from "./event.js";=
+import VSEvent from "./event.js";
 const $root = Store.root;
 const __delegate = (selector,isRoot,self,e)=>{
     let path = e.path;
