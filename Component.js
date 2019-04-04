@@ -57,7 +57,7 @@ const VShadow = (()=>{
                                 모든 내부 디펜전시는 querySelector로 통일
                         */
                         let temp = document.createElement("template");
-                        temp.insertAdjacentElement("afterbegin",await classObj.template);
+                        temp.appendChild(await classObj.template);
                         this.root = temp.content;
                         this.root.host = this;
                         this[notShadowSymbol] = true;
