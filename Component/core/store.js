@@ -2,6 +2,7 @@
 const childSymbol = Symbol("@@child");
 const observeSymbol = Symbol("@@dispatchObserveAction");
 const lazyObserveSymbol = Symbol("@@lazyDispatchObserveAction");
+const parentSymbol = Symbol("@@parent");
 
 const __iterate = (iterator,on = ()=>{}) => {
     let next = null;
@@ -23,8 +24,7 @@ let wrapProxy = (o)=>{
 export default class Store extends Map{
     constructor(base){
         super(base);
-        this.parent = null;
-        this.children = [];
+        this[parentSymbol] = null;
         // Store get,set proxy
         return wrapProxy(this);
     }
@@ -50,6 +50,9 @@ export default class Store extends Map{
     }
     get children(){
         return this.init(childSymbol,[]);
+    }
+    get parent(){
+        return this[parentSymbol];
     }
     static get root(){
         return _Store instanceof Store ? _Store : _Store = new Store();
@@ -88,7 +91,7 @@ export default class Store extends Map{
         if(store === this.root){
             return this;
         }
-        this.commitParents(k,v,store.parent);
+        this.commitParents(k,v,store[parentSymbol]);
     }
     commitChilds(k,v){
         __iterate(childs[Symbol.iterator](),($s)=>{
@@ -100,7 +103,7 @@ export default class Store extends Map{
         if(!(o instanceof Store)){
             o = this;
         }
-        child.parent = o;
+        child[parentSymbol] = o;
         o.children.push(child);
         return child;
     }
