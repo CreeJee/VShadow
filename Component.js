@@ -1,4 +1,4 @@
-import VSElement from "./Component/core/vs-element.js";
+
 
 // TODO : event 및 Async 그외 re-render 파이프라인 규격지원
 
@@ -87,7 +87,7 @@ const VShadow = (()=>{
                 if(super.disconnectedCallback instanceof Function){
                     super.disconnectedCallback();
                 }
-                if(this.parent instanceof VSElement){
+                if(this.parent instanceof HTMLElement){
                     let $child = this.parent.$store.children;
                     let index = $child.indexOf(this.$store);
                     if(index >= 0){
