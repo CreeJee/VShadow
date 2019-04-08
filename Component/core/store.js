@@ -37,10 +37,9 @@ export default class Store extends Map{
     merge(store,isIgnore = false){
         if(store instanceof this.constructor){
             __iterate(store.entries(),([k,v])=>{
-                if(this.has(k) && !isIgnore){
-                    continue;
+                if(!this.has(k) || isIgnore){
+                    this.set(k,v);
                 }
-                this.set(k,v);
             })
             return this;
         }

@@ -9,7 +9,7 @@ const __travelNode = (selectedNode,findCallback)=>{
 const __dispatchNearest = (selectedNode,key,value)=>{
     return __travelNode(selectedNode,(node)=>node.$store.dispatch(key,value));
 }
-const __inserthNode = (appendHost,key,value,node,k)=>{
+const __inserthNode = (appendHost,key,value,node)=>{
     
     let selectedNode =  appendHost.appendChild(node.cloneNode(true));
     __dispatchNearest(selectedNode,key,value);
