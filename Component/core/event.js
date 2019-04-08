@@ -2,6 +2,7 @@
 import Store from "./store.js";
 import VSElement from "./vs-element.js";
 const __pureEventSymbol = Symbol("@@pureEventSymbol");
+const __boundEventSymbol = Symbol("@@boundEventSymbol")
 const __travelNode = (selectedNode,findCallback)=>{
     let __recursive = (node)=> (node instanceof VSElement) ? findCallback(node) : Array.from(node.children).forEach(__recursive);
     return __recursive(selectedNode);
@@ -36,4 +37,5 @@ export default {
     },
     travelNode : __travelNode,
     symbol : __pureEventSymbol,
+    boundSymbol : __boundEventSymbol,
 };
