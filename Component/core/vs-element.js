@@ -49,8 +49,9 @@ function VSElement(superConstructor = HTMLElement){
         }
         delegate(type,cond=()=>false,resolve,reject=()=>{}){
             this.addEventListener(type,(e)=>{
-                if(cond(this,e)){
-                    resolve(e);
+                let filtedElement = cond(this,e);
+                if(filtedElement){
+                    resolve.apply(filtedElement,[e]);
                 }
             })
         }
