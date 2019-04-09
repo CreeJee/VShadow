@@ -25,11 +25,12 @@ export default {
         }
     },
     dispatchChild : __dispatchNearest,
-    parseExpression : (store,expr)=>{
+    // use bind expression scope this;
+    parseExpression : function(store,expr){
         let keys = (store instanceof Store ? Array.from(store.keys()) : Object.keys(store)).filter((k)=>!(typeof k === "symbol"));
         let values = keys.map((k)=>store[k]);
         try{
-            return new Function(...keys.concat(`return ${expr};`))(...values);
+            return new Function(...keys.concat(`return ${expr};`)).apply(this,values);
         }
         catch(e){
             throw new Error(`undefined expression on [${expr}]`);
