@@ -83,7 +83,7 @@ export default class Store extends Map{
         if(handlerMap instanceof Store){
             let handlers = handlerMap.get(k);
             let handlerArr = (Array.isArray(handlers) ? handlers : []);
-            let iterator = handlerArr[Symbol.asyncIterator]();
+            let iterator = handlerArr[Symbol.iterator]();
             if(!commitAction){
                 await __iterateAsync(iterator,async (handler)=>await handler(oldValue,v))
             }
@@ -100,13 +100,13 @@ export default class Store extends Map{
     }
     async commitChilds(k,v){
         let childs = this.children;
-        await __iterateAsync(childs[Symbol.asyncIterator](),async($s)=>{
+        await __iterateAsync(childs[Symbol.iterator](),async($s)=>{
             await $s.commit(k,v);
             await $s.commitChilds(k,v);
         })
     }
     async dispatchChild(k,v){
-        await __iterateAsync(this.children[Symbol.asyncIterator](),async ($store)=>await $store.dispatch(k,v));
+        await __iterateAsync(this.children[Symbol.iterator](),async ($store)=>await $store.dispatch(k,v));
         return this;
     }
     addChild(o,child = new Store()){
