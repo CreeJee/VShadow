@@ -4,10 +4,16 @@ const observeSymbol = Symbol("@@dispatchObserveAction");
 const lazyObserveSymbol = Symbol("@@lazyDispatchObserveAction");
 const parentSymbol = Symbol("@@parent");
 
-const __iterate = async (iterator,on = ()=>{}) => {
+const __iterateAsync = async (iterator,on = ()=>{}) => {
     let next = null;
     while(!(next = iterator.next()).done){
         await on(next.value);
+    }
+}
+const __iterate = (iterator,on = ()=>{}) => {
+    let next = null;
+    while(!(next = iterator.next()).done){
+        on(next.value);
     }
 }
 /**
@@ -77,9 +83,9 @@ export default class Store extends Map{
         if(handlerMap instanceof Store){
             let handlers = handlerMap.get(k);
             let handlerArr = (Array.isArray(handlers) ? handlers : []);
-            let iterator = handlerArr[Symbol.iterator]();
+            let iterator = handlerArr[Symbol.asyncIterator]();
             if(!commitAction){
-                await __iterate(iterator,async (handler)=>await handler(oldValue,v))
+                await __iterateAsync(iterator,async (handler)=>await handler(oldValue,v))
             }
         }
     }
@@ -94,13 +100,13 @@ export default class Store extends Map{
     }
     async commitChilds(k,v){
         let childs = this.children;
-        await __iterate(childs[Symbol.iterator](),async($s)=>{
+        await __iterateAsync(childs[Symbol.asyncIterator](),async($s)=>{
             await $s.commit(k,v);
             await $s.commitChilds(k,v);
         })
     }
     async dispatchChild(k,v){
-        await __iterate(this.children[Symbol.iterator](),async ($store)=>await $store.dispatch(k,v));
+        await __iterateAsync(this.children[Symbol.asyncIterator](),async ($store)=>await $store.dispatch(k,v));
         return this;
     }
     addChild(o,child = new Store()){
