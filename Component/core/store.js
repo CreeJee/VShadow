@@ -4,10 +4,10 @@ const observeSymbol = Symbol("@@dispatchObserveAction");
 const lazyObserveSymbol = Symbol("@@lazyDispatchObserveAction");
 const parentSymbol = Symbol("@@parent");
 
-const __iterate = (iterator,on = ()=>{}) => {
+const __iterate = async (iterator,on = ()=>{}) => {
     let next = null;
     while(!(next = iterator.next()).done){
-        on(next.value)
+        await on(next.value);
     }
 }
 /**
@@ -66,12 +66,12 @@ export default class Store extends Map{
     lazyDispatch(k,v){
         return this.init(lazyObserveSymbol).forceSet(k,v);
     }
-    dispatch(k,v){
+    async dispatch(k,v){
        this.set(k,v);
-       this.commit(k,v);
+       await this.commit(k,v);
        return v;
     }
-    commit(k,v,store = this,commitAction){
+    async commit(k,v,store = this,commitAction){
         const oldValue = store.get(k);
         const handlerMap = this.get(observeSymbol);
         if(handlerMap instanceof Store){
@@ -79,25 +79,29 @@ export default class Store extends Map{
             let handlerArr = (Array.isArray(handlers) ? handlers : []);
             let iterator = handlerArr[Symbol.iterator]();
             if(!commitAction){
-                __iterate(iterator,(handler)=>handler(oldValue,v))
+                await __iterate(iterator,async (handler)=>await handler(oldValue,v))
             }
         }
     }
-    commitParents(k,v,store = this){
+    async commitParents(k,v,store = this){
         if(store !== this){
-            store.commit(k,v);
+            await store.commit(k,v);
         }
         if(store === this.root){
             return this;
         }
-        this.commitParents(k,v,store[parentSymbol]);
+        await this.commitParents(k,v,store[parentSymbol]);
     }
-    commitChilds(k,v){
+    async commitChilds(k,v){
         let childs = this.children;
-        __iterate(childs[Symbol.iterator](),($s)=>{
-            $s.commit(k,v);
-            $s.commitChilds(k,v);
+        await __iterate(childs[Symbol.iterator](),async($s)=>{
+            await $s.commit(k,v);
+            await $s.commitChilds(k,v);
         })
+    }
+    async dispatchChild(k,v){
+        await __iterate(this.children[Symbol.iterator](),async ($store)=>await $store.dispatch(k,v));
+        return this;
     }
     addChild(o,child = new Store()){
         if(!(o instanceof Store)){
@@ -106,10 +110,6 @@ export default class Store extends Map{
         child[parentSymbol] = o;
         o.children.push(child);
         return child;
-    }
-    dispatchChild(k,v){
-        __iterate(this.children[Symbol.iterator](),($store)=>$store.dispatch(k,v));
-        return this;
     }
     removeChild(o){
         let index = this.children.indexOf(o);
