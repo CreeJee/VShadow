@@ -107,7 +107,7 @@ export default class Store extends Map{
         await __iterateAsync(this.children[Symbol.iterator](),async ($store)=>await $store.dispatch(k,v));
         return this;
     }
-    addChild(o,child = new Store()){
+    addChild(child = new Store(),o){
         if(!(o instanceof Store)){
             o = this;
         }

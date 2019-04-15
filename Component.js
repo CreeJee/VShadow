@@ -48,7 +48,7 @@ const VShadow = (()=>{
             connectedCallback(){
                 (async ()=>{
                     this.parent = _getParent(this.parentNode);
-                    this.parent.$store.addChild(this,this.$store);
+                    this.parent.$store.addChild(this.$store);
                     this.root.innerHTML = await classObj.template;
                     this.VShadow(
                         this.root,
