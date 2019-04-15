@@ -90,13 +90,10 @@ export default class Store extends Map{
         }
     }
     async commitParents(k,v,store = this){
-        if(store !== this){
-            await store.commit(k,v);
+        await store.commit(k,v);
+        if(store.root !== store){
+            return await store.commitParents(k,v,store[parentSymbol]);
         }
-        if(store === this.root){
-            return this;
-        }
-        await this.commitParents(k,v,store[parentSymbol]);
     }
     async commitChilds(k,v){
         let childs = this.children;
