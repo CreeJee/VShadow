@@ -1,4 +1,3 @@
-// TODO : Store들을 async하게 바꾸기
 const childSymbol = Symbol("@@child");
 const observeSymbol = Symbol("@@dispatchObserveAction");
 const lazyObserveSymbol = Symbol("@@lazyDispatchObserveAction");
@@ -19,6 +18,8 @@ const __iterate = (iterator,on = ()=>{}) => {
 /**
 * component store storage
 * @type {Map}
+*
+* inner source is not acting Proxy get,set
 */
 let _Store = null;
 let wrapProxy = (o)=>{
@@ -37,14 +38,14 @@ export default class Store extends Map{
     clone(){
         // TODO : deep clone support
         let temp = new Store();
-        __iterate(this.entries(),(v)=>temp.set(...v))
+        __iterate(this.entries(),(v)=>temp.forceSet(...v))
         return temp;
     }
     merge(store,isIgnore = false){
         if(store instanceof this.constructor){
             __iterate(store.entries(),([k,v])=>{
                 if(!this.has(k) || isIgnore){
-                    this.set(k,v);
+                    this.forceSet(k,v);
                 }
             })
             return this;
@@ -66,14 +67,14 @@ export default class Store extends Map{
         return this.constructor.root;
     }
     forceSet(k,v){
-        this.set(k,v);
+        super.set.apply(this,[k,v]);
         return v;
     }
     lazyDispatch(k,v){
         return this.init(lazyObserveSymbol).forceSet(k,v);
     }
     async dispatch(k,v){
-       this.set(k,v);
+       this.forceSet(k,v);
        await this.commit(k,v);
        return v;
     }
@@ -90,7 +91,7 @@ export default class Store extends Map{
         }
     }
     async commitParents(k,v,store = this){
-        let parentStore = store[parentSymbol];
+        let parentStore = store.get(parentSymbol);
         await store.commit(k,v);
         if(store.root !== store && parentStore){
             return await store.commitParents(k,v,parentStore);
@@ -111,7 +112,7 @@ export default class Store extends Map{
         if(!(o instanceof Store)){
             o = this;
         }
-        child[parentSymbol] = o;
+        child.forceSet(parentSymbol,o);
         o.children.push(child);
         return child;
     }
@@ -124,7 +125,7 @@ export default class Store extends Map{
         return cond;
     }
     init(o,v = new Store()){
-        return (!this.has(o)) ? (this.set(o,v),v) : this.get(o);
+        return (!this.has(o)) ? (this.forceSet(o,v),v) : this.get(o);
     }
     hasChild(o){
         return this.children.includes(o);
@@ -138,7 +139,7 @@ export default class Store extends Map{
         if(nonHandler.length > 0){
             throw new Error(`is't compatible at [${nonHandler.join(",")}}]`)
         }
-        observeStore.set(prop,(Array.isArray(observeHandlers) ?  observeHandlers : []).concat(action));
+        observeStore.forceSet(prop,(Array.isArray(observeHandlers) ?  observeHandlers : []).concat(action));
         if((lazyStore = this.get(lazyObserveSymbol)) instanceof Store && (tempValue = lazyStore.get(prop))){
             this.commit(prop,tempValue,lazyStore);
         }
