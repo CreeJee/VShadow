@@ -13,8 +13,12 @@ const VShadow = (()=>{
     let Store = null;
     let _Store = null;
     let onLoad = ()=>{};
+    let [observeSymbol,lazyObserveSymbol] = [];
     (async ()=>{
-        Store = (await import("./Component/core/store.js")).default;
+        const StoreObj = (await import("./Component/core/store.js"));
+        Store = StoreObj.default;
+        observeSymbol = StoreObj.observeSymbol;
+        lazyObserveSymbol = StoreObj.lazyObserveSymbol;
         // RootStore
         //non - safe but side effect
         onLoad.apply(VShadow,[ROOT_HTML.$store = Store.root]);
@@ -28,14 +32,18 @@ const VShadow = (()=>{
         const classObj = class BaseComponent extends anyHtmlClass{
             // private clone util
             [assignClone](oldNode,newNode){
-                newNode.$store = new Store();
+                let clonedStore = new Store();
+                clonedStore[observeSymbol] = oldNode.$store[observeSymbol];
+                clonedStore[lazyObserveSymbol] = oldNode.$store[lazyObserveSymbol];
+
+                newNode.$store = clonedStore;
                 newNode.parent = oldNode.parent;
                 newNode.isReady = oldNode.isReady;
                 return newNode;
             }
             // native observe
             cloneNode(deep){
-                return this[assignClone](this,super.cloneNode.call(this,deep));
+                return this[assignClone](this,document.importNode(this,deep));
             }
             
             async connectedCallback(){

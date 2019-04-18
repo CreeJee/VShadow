@@ -28,7 +28,7 @@ let wrapProxy = (o)=>{
         get : (obj,prop)=>prop in o ? o[prop] instanceof Function ? o[prop].bind(o) : o[prop] : obj.get(prop)
     })
 }
-export default class Store extends Map{
+const Store = class Store extends Map{
     constructor(base){
         super(base);
         this[parentSymbol] = null;
@@ -146,3 +146,6 @@ export default class Store extends Map{
         return wrapProxy(this);
     }
 }
+
+export default Store;
+export {Store,childSymbol,observeSymbol,lazyObserveSymbol,parentSymbol}

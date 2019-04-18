@@ -3,20 +3,20 @@ import Store from "./store.js";
 import VSElement from "./vs-element.js";
 const __pureEventSymbol = Symbol("@@pureEventSymbol");
 const __boundEventSymbol = Symbol("@@boundEventSymbol")
-const __travelNode = (selectedNode,findCallback)=>{
-    let __recursive = (node)=> (node instanceof VSElement) ? findCallback(node) : Array.from(node.children).forEach(__recursive);
-    return __recursive(selectedNode);
+const __travelNode = async (selectedNode,findCallback)=>{
+    let __recursive = async (node)=> (node instanceof VSElement) ? await findCallback(node) : Array.from(node.children).forEach(__recursive);
+    return await __recursive(selectedNode);
 }
-const __dispatchNearest = (selectedNode,key,value)=>{
-    return __travelNode(selectedNode,(node)=>node.$store.dispatch(key,value));
+const __dispatchNearest = async (selectedNode,key,value)=>{
+    return await __travelNode(selectedNode,async (node)=>node.$store.dispatch(key,value));
 }
-const __inserthNode = (appendHost,key,value,node)=>{
+const __inserthNode = async (appendHost,key,value,node)=>{
     
-    let selectedNode =  appendHost.appendChild(node.cloneNode(true));
-    __dispatchNearest(selectedNode,key,value);
+    let selectedNode = appendHost.appendChild(document.importNode(node,true));
+    await __dispatchNearest(selectedNode,key,value);
 };
 export default {
-    dispatchAppend : (assignedElements,appendHost,k,v)=>{
+    dispatchAppend : async (assignedElements,appendHost,k,v)=>{
         if(Array.isArray(assignedElements)){
             assignedElements.forEach(__inserthNode.bind(null,appendHost,k,v));
         }

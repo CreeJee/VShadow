@@ -9,23 +9,25 @@ const iterateSymbol = Symbol("@@IterateSymbol");
 const onRenderSymbol = Symbol("@@OnRenderSymbol");
 const getRangeArray = (start,total)=>Array.from({ length: ((total) - start) }, (_, i) => ({}) )
 const getWrappedChilds = (children,renederPerElement)=>Array.from(children).reduce((accr,v,k,arr)=>(k % renederPerElement === 0 ? accr.push([v]) : accr[Math.floor(k/renederPerElement)].push(v),accr) ,[])
+//@name getWrappedChilds
+// child elements wrapping for one loop Render Array
+// for example
+/*  
+    <vs-loop count="2" start="0">
+        <p>test1</p>
+        <p>test2</p>
+    </vs-loop>
+
+    then we changed
+    [Node,Node,Node,Node] to [[Node,Node],[Node,Node]]
+ */
 const limitChange = function(assignedElements,key,value){
     let $store = this.$store;
     let start =  $store.get("start");
     let total = $store.get("total");
     let renederPerElement = assignedElements.length;
     let data = $store.get("data");
-    // child elements wrapping for one loop Render Array
-    // for example
-    /*  
-        <vs-loop count="2" start="0">
-            <p>test1</p>
-            <p>test2</p>
-        </vs-loop>
-
-        then we changed
-        [Node,Node,Node,Node] to [[Node,Node],[Node,Node]]
-     */
+    
     let childNodeArray = getWrappedChilds(this.children,renederPerElement);
     if(key === "as"){
         $store.set("as",data = value);
@@ -63,6 +65,10 @@ const limitChange = function(assignedElements,key,value){
 const VSLoopGen = (superClass) => class VSLoop extends VSElement.extend(superClass){
     constructor(){
         super();
+        this.$store.attach(iterateSymbol,(_,[v,k])=>{
+            this.$store.set("row",v);
+            this.$store.set("key",k);
+        });
     }
     static get template(){
         return fetch(`${getRelativeUrl(import.meta.url)}/dom/base/vs-loop.html`).then((res)=>res.text());
@@ -103,7 +109,6 @@ const VSLoopGen = (superClass) => class VSLoop extends VSElement.extend(superCla
         }
         
         assignedElements.forEach((node)=>{
-            console.log(node)
             node.remove();
         });
         // dispatch new generate and cached
