@@ -9,7 +9,7 @@ const VShadow = (()=>{
     const tagNameSymbol = Symbol("@@tagName");
     const extendsSymbol = Symbol("@@extendsTagName");
     const assignClone = Symbol("@@assignSymbol");
-    const ROOT_HTML = document.children[0];
+    let ROOT_HTML = document.children[0];
     let Store = null;
     let _Store = null;
     let onLoad = ()=>{};
@@ -33,7 +33,6 @@ const VShadow = (()=>{
                 if(deep){
                     (async ()=>{
                         Array.from(newNode.children).forEach(n=>generatedNode.appendChild(n));
-                        await generatedNode.VShadow(newNode.root,newNode.$store);
                     })()
                 }
                 generatedNode.parent = oldNode.parent;
@@ -45,20 +44,18 @@ const VShadow = (()=>{
                 return this[assignClone](this,super.cloneNode(deep),deep);
             }
             
-            connectedCallback(){
-                (async ()=>{
-                    this.parent = _getParent(this.parentNode);
-                    this.parent.$store.addChild(this.$store);
-                    this.root.innerHTML = await classObj.template;
-                    this.VShadow(
-                        this.root,
-                        this.$store
-                    );
-                    super.isReady = true;
-                    if(super.connectedCallback instanceof Function){
-                        super.connectedCallback();
-                    }
-                })();
+            async connectedCallback(){
+                this.parent = this.isConnected ? _getParent(this.parentNode) : ROOT_HTML;
+                this.parent.$store.addChild(this.$store);
+                this.root.innerHTML = await classObj.template;
+                this.VShadow(
+                    this.root,
+                    this.$store
+                );
+                super.isReady = true;
+                if(super.connectedCallback instanceof Function){
+                    super.connectedCallback();
+                }
             }
             attributeChangedCallback(key,oldVal,newVal){
                 if(this.isReady && super.attributeChangedCallback instanceof Function){
@@ -76,6 +73,13 @@ const VShadow = (()=>{
                         $child.splice(index,1)
                     }
                 }
+            }
+            adoptedCallback(oldDoc,newDoc){
+                if(super.adoptedCallback instanceof Function){
+                    super.adoptedCallback();
+                }
+                ROOT_HTML = newDoc;
+                ROOT_HTML.$store = Store.root;
             }
         };
         Object.defineProperty(classObj,"name",{
