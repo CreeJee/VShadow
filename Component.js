@@ -28,8 +28,8 @@ const VShadow = (()=>{
         const classObj = class BaseComponent extends anyHtmlClass{
             // private clone util
             [assignClone](oldNode,newNode,deep){
+                let generatedNode = new (oldNode.constructor.bind(newNode))();
                 newNode.$store = new Store();
-                let generatedNode = new (newNode.constructor.bind(newNode))();
                 if(deep){
                     (async ()=>{
                         Array.from(newNode.children).forEach(n=>generatedNode.appendChild(n));
@@ -42,7 +42,7 @@ const VShadow = (()=>{
             }
             // native observe
             cloneNode(deep){
-                return this[assignClone](this,super.cloneNode(deep),deep);
+                return this[assignClone](this,super.cloneNode.call(this,deep),deep);
             }
             
             connectedCallback(){
