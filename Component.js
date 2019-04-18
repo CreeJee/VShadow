@@ -27,21 +27,15 @@ const VShadow = (()=>{
         const _getParent = (_parent)=>_parent.$store instanceof Store ? _parent : _parent === ROOT_HTML ? ROOT_HTML : _getParent((_parent instanceof DocumentFragment ? _parent.host : _parent.parentNode)) ;
         const classObj = class BaseComponent extends anyHtmlClass{
             // private clone util
-            [assignClone](oldNode,newNode,deep){
-                let generatedNode = new (oldNode.constructor.bind(newNode))();
+            [assignClone](oldNode,newNode){
                 newNode.$store = new Store();
-                if(deep){
-                    (async ()=>{
-                        Array.from(newNode.children).forEach(n=>generatedNode.appendChild(n));
-                    })()
-                }
-                generatedNode.parent = oldNode.parent;
-                generatedNode.isReady = oldNode.isReady;
-                return generatedNode;
+                newNode.parent = oldNode.parent;
+                newNode.isReady = oldNode.isReady;
+                return newNode;
             }
             // native observe
             cloneNode(deep){
-                return this[assignClone](this,super.cloneNode.call(this,deep),deep);
+                return this[assignClone](this,super.cloneNode.call(this,deep));
             }
             
             async connectedCallback(){

@@ -103,6 +103,7 @@ const VSLoopGen = (superClass) => class VSLoop extends VSElement.extend(superCla
         }
         
         assignedElements.forEach((node)=>{
+            console.log(node)
             node.remove();
         });
         // dispatch new generate and cached
