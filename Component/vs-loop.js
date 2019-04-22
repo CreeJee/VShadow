@@ -74,7 +74,8 @@ const VSLoopGen = (superClass) => class VSLoop extends VSElement.extend(superCla
         });
     }
     get [isParentIterate](){
-        return this.parent.$store[observeSymbol][iterateSymbol] instanceof Object && this.$store.row instanceof Object;
+        let parentStore = this.parent.$store;
+        return parentStore.has(observeSymbol) && parentStore[observeSymbol].has(iterateSymbol) && parentStore[observeSymbol][iterateSymbol] instanceof Object && this.$store.row instanceof Object;
     }
     static get template(){
         return fetch(`${getRelativeUrl(import.meta.url)}/dom/base/vs-loop.html`).then((res)=>res.text());
