@@ -1,12 +1,14 @@
 import VSEventCore from "./core/event.js";
 import VSElement from "./core/vs-element.js";
-import Store from "./core/store.js";
+import {Store,observeSymbol} from "./core/store.js";
 import {getRelativeUrl} from "./core/util.js";
 
 // store attach iterate symbol to slot tag
 // https://alligator.io/web-components/composing-slots-named-slots/
 const iterateSymbol = Symbol("@@IterateSymbol");
 const onRenderSymbol = Symbol("@@OnRenderSymbol");
+
+const isParentIterate = Symbol("@@isParentIterate");
 const getRangeArray = (start,total)=>Array.from({ length: ((total) - start) }, (_, i) => ({}) )
 const getWrappedChilds = (children,renederPerElement)=>Array.from(children).reduce((accr,v,k,arr)=>(k % renederPerElement === 0 ? accr.push([v]) : accr[Math.floor(k/renederPerElement)].push(v),accr) ,[])
 //@name getWrappedChilds
@@ -65,10 +67,14 @@ const limitChange = function(assignedElements,key,value){
 const VSLoopGen = (superClass) => class VSLoop extends VSElement.extend(superClass){
     constructor(){
         super();
-        this.$store.attach(iterateSymbol,(_,[v,k])=>{
+        this.$store.attach(iterateSymbol,async (_,[v,k])=>{
             this.$store.set("row",v);
             this.$store.set("key",k);
+            return await this.VShadow(this.root,this.$store);
         });
+    }
+    get [isParentIterate](){
+        return this.parent.$store[observeSymbol][iterateSymbol] instanceof Object && this.$store.row instanceof Object;
     }
     static get template(){
         return fetch(`${getRelativeUrl(import.meta.url)}/dom/base/vs-loop.html`).then((res)=>res.text());
@@ -92,29 +98,31 @@ const VSLoopGen = (superClass) => class VSLoop extends VSElement.extend(superCla
         debugger;
     }
     async VShadow(root,$store){
-        const attributes = this.attributes;
-        const assignedElements = (this.isShadow) ? root.querySelector("#slot").assignedElements() : Array.from(this.children);
-        let temp = -1;
-        let iterateStart = null,iterateTotal = null;
-        let iterateAsArray = [];
-        let fillEnd = -1;
-        $store.set("start",iterateStart = attributes.start ? (isNaN(temp = parseInt(attributes.start.value)) ? VSEventCore.parseExpression(this,attributes.start.value) : temp ) : 0);
-        $store.set("total",iterateTotal = attributes.total ? (isNaN(temp = parseInt(attributes.total.value)) ? VSEventCore.parseExpression(this,attributes.total.value) : temp ) : (iterateAsArray.length || undefined)); 
-        fillEnd = iterateTotal;
-        try{
-            $store.set("data",iterateAsArray = attributes.as ? ($store.forceSet("as",VSEventCore.parseExpression(this,attributes.as.value) || [])).slice(iterateStart,fillEnd) : getRangeArray(iterateStart,fillEnd));
+        if(!this[isParentIterate]){
+            const attributes = this.attributes;
+            const assignedElements = (this.isShadow) ? root.querySelector("#slot").assignedElements() : Array.from(this.children);
+            let temp = -1;
+            let iterateStart = null,iterateTotal = null;
+            let iterateAsArray = [];
+            let fillEnd = -1;
+            $store.set("start",iterateStart = attributes.start ? (isNaN(temp = parseInt(attributes.start.value)) ? VSEventCore.parseExpression(this,attributes.start.value) : temp ) : 0);
+            $store.set("total",iterateTotal = attributes.total ? (isNaN(temp = parseInt(attributes.total.value)) ? VSEventCore.parseExpression(this,attributes.total.value) : temp ) : (iterateAsArray.length || undefined)); 
+            fillEnd = iterateTotal;
+            try{
+                $store.set("data",iterateAsArray = attributes.as ? ($store.forceSet("as",VSEventCore.parseExpression(this,attributes.as.value) || [])).slice(iterateStart,fillEnd) : getRangeArray(iterateStart,fillEnd));
+            }
+            catch(e){
+                throw new Error(`undefined variable on [${attributes.as.value}]`);
+            }
+            
+            assignedElements.forEach((node)=>{
+                node.remove();
+            });
+            // dispatch new generate and cached
+            iterateAsArray.forEach((v,k)=>{
+                VSEventCore.dispatchAppend(assignedElements,root.host,iterateSymbol,[v,k]);
+            });
         }
-        catch(e){
-            throw new Error(`undefined variable on [${attributes.as.value}]`);
-        }
-        
-        assignedElements.forEach((node)=>{
-            node.remove();
-        });
-        // dispatch new generate and cached
-        iterateAsArray.forEach((v,k)=>{
-            VSEventCore.dispatchAppend(assignedElements,root.host,iterateSymbol,[v,k]);
-        });
         $store.attach("start",limitChange.bind(this,assignedElements,"start"));
         $store.attach("total",limitChange.bind(this,assignedElements,"total"));
         $store.attach("data",limitChange.bind(this,assignedElements,"data"));
