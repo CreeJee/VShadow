@@ -123,13 +123,13 @@ const VSLoopGen = (superClass) => class VSLoop extends VSElement.extend(superCla
             iterateAsArray.forEach((v,k)=>{
                 VSEventCore.dispatchAppend(assignedElements,root.host,iterateSymbol,[v,k]);
             });
+            $store.attach("start",limitChange.bind(this,assignedElements,"start"));
+            $store.attach("total",limitChange.bind(this,assignedElements,"total"));
+            $store.attach("data",limitChange.bind(this,assignedElements,"data"));
+            $store.attach("as",limitChange.bind(this,assignedElements,"as"));
+    
+            $store.commit(onRenderSymbol,$store);
         }
-        $store.attach("start",limitChange.bind(this,assignedElements,"start"));
-        $store.attach("total",limitChange.bind(this,assignedElements,"total"));
-        $store.attach("data",limitChange.bind(this,assignedElements,"data"));
-        $store.attach("as",limitChange.bind(this,assignedElements,"as"));
-
-        $store.commit(onRenderSymbol,$store);
     }
     //on dom attached
     connectedCallback(){
