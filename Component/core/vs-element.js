@@ -1,6 +1,7 @@
 import Store from "./store.js";
 import VSEvent from "./event.js";
 const $root = Store.root;
+const isVSElementProperty = Symbol("isVSElementProp");
 const __delegate = (selector,isRoot,self,e)=>{
     let path = e.path;
     return Array.from((isRoot ? self.root : self).querySelectorAll(selector)).find((n)=>path.slice(0,path.indexOf(self)).includes(n))
@@ -38,6 +39,12 @@ function VSElement(superConstructor = HTMLElement){
         }
         async VShadow(...args){
             return Promise.reject(new Error(`need implements [async ${this.name}.VShadow()]`));
+        }
+        get [isVSElementProperty](){
+            return true;
+        }
+        static [Symbol.hasInstance](instance) {
+            return instance[isVSElementProperty];
         }
         on(type,selector,resolve,reject=()=>{}){
             let result = Array.from(this.querySelectorAll(selector));

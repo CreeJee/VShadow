@@ -1,28 +1,32 @@
 import VSLoop from "./vs-loop.js";
 import VSEventCore from "./core/event.js";
 import VSElement from "./core/vs-element.js";
-import {getRelativeUrl} from "./core/util.js";
 
-const condSymbol = Symbol("@@notCondSymbol");
-const isDispatched = Symbol("@@isDispatched");
-const _dispatch = (self,[val,key])=>{
-    const attributes = self.attributes;
-    const $store = self.$store;
-    let cond = false;
-    $store.children.forEach(($store)=>{
-        if(cond = VSEventCore.parseExpression({value : val},(attributes.cond || {}).value)){
-            $store.dispatch(VSLoop.iterateSymbol,[val,key])
+import {getRelativeUrl} from "./core/util.js";
+import Store from "./core/store.js";
+
+const beforeDisplaySymbol = Symbol("@@beforeDisplay");
+const condSymbol = Symbol("@@condSymbol");
+const _dispatch = async function([val,key]){
+    const $store = this.$store;
+    const ChildElements = Array.from(this.children);
+    let cond = !!VSEventCore.parseExpression({key : key,value : val},(this.getAttribute("cond") || ""));
+    if(cond){
+        this.style.display = $store.get(beforeDisplaySymbol);
+        await $store.dispatchChild(VSLoop.iterateSymbol,[val,key]);
+    }
+    else{
+        if(!this.$store.has(beforeDisplaySymbol)){
+            this.$store.forceSet(beforeDisplaySymbol,window.getComputedStyle(this,null).display);
         }
-        $store.dispatch(condSymbol,[cond,val,key]);
-    })
+        this.style.display = "none";
+    }
 }
 const VSIfGen = (superClass) => class VSif extends VSElement.extend(superClass){
     constructor(){
         super();
-        this[isDispatched] = false;
-        this.$store.attach(VSLoop.iterateSymbol,(oldVal,newVal)=>{
-            this[isDispatched] = true;
-            _dispatch(this,newVal);
+        this.$store.attach(VSLoop.iterateSymbol,async (oldVal,newVal)=>{
+            await _dispatch.apply(this,[newVal]);
         })
     }
     static get condSymbol(){
@@ -38,13 +42,6 @@ const VSIfGen = (superClass) => class VSif extends VSElement.extend(superClass){
         return VSIfGen(superClass);
     }
     async VShadow(root,$store){
-        const attributes = root.host.attributes;
-        if(!isDispatched){ 
-            let cond = (attributes.cond ? !!VSEventCore.parseExpression(this,attributes.cond.value) : false);
-            if(cond){
-                _dispatch(this,$store);
-            }
-        }
 
     }
     //on dom attached
@@ -64,3 +61,4 @@ const VSIfGen = (superClass) => class VSif extends VSElement.extend(superClass){
     }
 }
 export default VSIfGen(HTMLElement);
+export {VSIfGen,condSymbol};

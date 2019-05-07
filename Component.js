@@ -50,7 +50,7 @@ const VShadow = (()=>{
                 this.parent = this.isConnected ? _getParent(this.parentNode) : ROOT_HTML;
                 this.parent.$store.addChild(this.$store);
                 this.root.innerHTML = await classObj.template;
-                this.VShadow(
+                await this.VShadow(
                     this.root,
                     this.$store
                 );
@@ -133,7 +133,7 @@ const VShadow = (()=>{
                 // window.customElements.whenDefined(registerdTagName).then(ElementClass.onFactory);
                 if(typeof registerdTagName === "string"  && registerdTagName.includes("-")){
                     if (extendsTagName !== undefined) {
-                        this.extendsTag[extendsTagName] = ElementClass;
+                        this.extendsTag[registerdTagName] = ElementClass;
                     }
                     customElements.define(registerdTagName,ElementClass,extendsTagName ? {extends : extendsTagName} : undefined);
                     return this.definedTag[registerdTagName] = ElementClass;

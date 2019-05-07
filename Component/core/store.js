@@ -5,7 +5,7 @@ const parentSymbol = Symbol("@@parent");
 
 const __iterateAsync = async (iterator,on = ()=>{}) => {
     let next = null;
-    while(!(next = iterator.next()).done){
+    while(!(next = await iterator.next()).done){
         await on(next.value);
     }
 }
@@ -24,8 +24,11 @@ const __iterate = (iterator,on = ()=>{}) => {
 let _Store = null;
 let wrapProxy = (o)=>{
     return new Proxy(o,{
-        set : (obj,prop,value)=>(obj.dispatch(prop,value,obj),true),
-        get : (obj,prop)=>prop in o ? o[prop] instanceof Function ? o[prop].bind(o) : o[prop] : obj.get(prop)
+        set : async (obj,prop,value)=>(await obj.dispatch(prop,value,obj),true),
+        get : (obj,prop)=>prop in o ? o[prop] instanceof Function ? o[prop].bind(o) : o[prop] : obj.get(prop),
+        deleteProperty : (obj,key)=> obj.has(key) && obj.delete(key),
+        has : (obj,key) => obj.has(key),
+        ownKeys : (obj) => obj.keys(),
     })
 }
 const Store = class Store extends Map{
@@ -58,7 +61,7 @@ const Store = class Store extends Map{
         return this.init(childSymbol,[]);
     }
     get parent(){
-        return this[parentSymbol];
+        return this.get(parentSymbol);
     }
     static get root(){
         return _Store instanceof Store ? _Store : _Store = new Store();
@@ -92,20 +95,28 @@ const Store = class Store extends Map{
     }
     async commitParents(k,v,store = this){
         let parentStore = store.get(parentSymbol);
-        await store.commit(k,v);
-        if(store.root !== store && parentStore){
-            return await store.commitParents(k,v,parentStore);
+        if(parentStore instanceof Store){
+            if(store.root !== parentStore && !parentStore.isAttach(k)){
+                return await store.commitParents(k,v,parentStore);
+            }
+            else{
+                await parentStore.commit(k,v);
+            }
         }
     }
-    async commitChilds(k,v){
-        let childs = this.children;
+    async commitChilds(k,v,store = this){
+        let childs = store.children;
         await __iterateAsync(childs[Symbol.iterator](),async($s)=>{
-            await $s.commit(k,v);
-            await $s.commitChilds(k,v);
+            if(!$s.isAttach(k)){
+                await $s.commitChilds(k,v,$s);
+            }
+            else{
+                await $s.commit(k,v);
+            }
         })
     }
     async dispatchChild(k,v){
-        await __iterateAsync(this.children[Symbol.iterator](),async ($store)=>await $store.dispatch(k,v));
+        let state = await __iterateAsync(this.children[Symbol.iterator](),async ($store)=>await $store.dispatch(k,v));
         return this;
     }
     addChild(child = new Store(),o){
@@ -129,6 +140,10 @@ const Store = class Store extends Map{
     }
     hasChild(o){
         return this.children.includes(o);
+    }
+    isAttach(prop){
+        let $observeStore = null;
+        return !!($observeStore = this.get(observeSymbol)) && $observeStore.has(prop) && $observeStore.get(prop).length > 0;
     }
     attach(prop,...action){
         const observeStore = this.init(observeSymbol);
