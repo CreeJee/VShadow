@@ -10,9 +10,9 @@ const condSymbol = Symbol("@@condSymbol");
 const _dispatch = async function([val,key]){
     const $store = this.$store;
     const ChildElements = Array.from(this.children);
-    let cond = !!VSEventCore.parseExpression({key : key,value : val},(this.getAttribute("cond") || ""));
+    let cond = !!VSEventCore.parseExpression.call(this,{key : key,value : val},(this.getAttribute("cond") || ""));
     if(cond){
-        this.style.display = $store.get(beforeDisplaySymbol);
+        this.style.display = (this.$store.get(beforeDisplaySymbol) || "block");
         await $store.dispatchChild(VSLoop.iterateSymbol,[val,key]);
     }
     else{

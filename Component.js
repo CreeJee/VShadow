@@ -1,14 +1,9 @@
-
-
-// TODO : event 및 Async 그외 re-render 파이프라인 규격지원
-
 /********************
 *  custom elements  *
 *********************/
 const VShadow = (()=>{
     const tagNameSymbol = Symbol("@@tagName");
     const extendsSymbol = Symbol("@@extendsTagName");
-    const assignClone = Symbol("@@assignSymbol");
     let ROOT_HTML = document.children[0];
     let Store = null;
     let _Store = null;
@@ -27,25 +22,11 @@ const VShadow = (()=>{
      * @param  {HTMLElement} anyHtmlClass [description]
      * @return {Class extends BaseComponent} [description]
      */
+
+
     const BaseComponent = (anyHtmlClass) => {
         const _getParent = (_parent)=>_parent.$store instanceof Store ? _parent : _parent === ROOT_HTML ? ROOT_HTML : _getParent((_parent instanceof DocumentFragment ? _parent.host : _parent.parentNode)) ;
-        const classObj = class BaseComponent extends anyHtmlClass{
-            // private clone util
-            [assignClone](oldNode,newNode){
-                let clonedStore = new Store();
-                clonedStore[observeSymbol] = oldNode.$store[observeSymbol];
-                clonedStore[lazyObserveSymbol] = oldNode.$store[lazyObserveSymbol];
-
-                newNode.$store = clonedStore;
-                newNode.parent = oldNode.parent;
-                newNode.isReady = oldNode.isReady;
-                return newNode;
-            }
-            // native observe
-            cloneNode(deep){
-                return this[assignClone](this,document.importNode(this,deep));
-            }
-            
+        const classObj = class BaseComponent extends anyHtmlClass{            
             async connectedCallback(){
                 this.parent = this.isConnected ? _getParent(this.parentNode) : ROOT_HTML;
                 this.parent.$store.addChild(this.$store);
@@ -184,3 +165,5 @@ const VShadow = (()=>{
         }
     );
 })();
+// TODO : AMD,es6 module 지원하기 
+(window.VShadow === undefined ? window.VShadow = VShadow : null)

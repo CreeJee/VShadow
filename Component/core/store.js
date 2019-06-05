@@ -3,11 +3,29 @@ const observeSymbol = Symbol("@@dispatchObserveAction");
 const lazyObserveSymbol = Symbol("@@lazyDispatchObserveAction");
 const parentSymbol = Symbol("@@parent");
 
-const __iterateAsync = async (iterator,on = ()=>{}) => {
+const __iterateAsync = async (iterator,on = ()=>{},onFail) => {
     let next = null;
-    while(!(next = await iterator.next()).done){
-        await on(next.value);
+    let res = [];
+    let k = 0;
+    let isFail = false;
+    for await(let handler of iterator){
+        try{
+            await on(handler,k);
+        }
+        catch(e){
+            if (isFail = (typeof onFail === "function")){
+                break;
+            }
+            else{
+                throw e;
+            }
+        }
+        k++;
     }
+    if(isFail){
+        return await __iterateAsync(iterator,onFail);
+    }
+    return res;
 }
 const __iterate = (iterator,on = ()=>{}) => {
     let next = null;
@@ -30,7 +48,8 @@ let wrapProxy = (o)=>{
         has : (obj,key) => obj.has(key),
         ownKeys : (obj) => obj.keys(),
     })
-}
+};
+
 const Store = class Store extends Map{
     constructor(base){
         super(base);
@@ -61,7 +80,7 @@ const Store = class Store extends Map{
         return this.init(childSymbol,[]);
     }
     get parent(){
-        return this.get(parentSymbol);
+        return wrapProxy(this.get(parentSymbol));
     }
     static get root(){
         return _Store instanceof Store ? _Store : _Store = new Store();
@@ -76,55 +95,74 @@ const Store = class Store extends Map{
     lazyDispatch(k,v){
         return this.init(lazyObserveSymbol).forceSet(k,v);
     }
+    
     async dispatch(k,v){
-       this.forceSet(k,v);
-       await this.commit(k,v);
-       return v;
+        let oldValue = this.get(k);
+        this.forceSet(k,v);
+        await this.commit(k,v,this,oldValue);
+        return v;
     }
-    async commit(k,v,store = this,commitAction){
-        const oldValue = store.get(k);
-        const handlerMap = this.get(observeSymbol);
+    async commit(k,v,store = this,oldValue = store.get(k)){
+        const handlerMap = store.get(observeSymbol);
         if(handlerMap instanceof Store){
             let handlers = handlerMap.get(k);
             let handlerArr = (Array.isArray(handlers) ? handlers : []);
             let iterator = handlerArr[Symbol.iterator]();
-            if(!commitAction){
-                await __iterateAsync(iterator,async (handler)=>await handler(oldValue,v))
-            }
+            await __iterateAsync(
+                iterator,
+                async (handler)=>await handler(oldValue,v),
+                async (handler)=>await handler(v,oldValue)
+            )
         }
     }
-    async commitParents(k,v,store = this){
+    async commitParents(k,v,store = this,beforeCommit = ()=>{}){
         let parentStore = store.get(parentSymbol);
         if(parentStore instanceof Store){
             if(store.root !== parentStore && !parentStore.isAttach(k)){
-                return await store.commitParents(k,v,parentStore);
+                return await store.commitParents(k,v,parentStore,beforeCommit);
             }
             else{
+                await beforeCommit(k,v,parentStore,beforeCommit);
                 await parentStore.commit(k,v);
             }
         }
     }
-    async commitChilds(k,v,store = this){
+    async commitChilds(k,v,store = this,beforeCommit = ()=>{}){
         let childs = store.children;
-        await __iterateAsync(childs[Symbol.iterator](),async($s)=>{
-            if(!$s.isAttach(k)){
-                await $s.commitChilds(k,v,$s);
+        await __iterateAsync(
+            childs[Symbol.iterator](),
+            async ($s)=>{
+                if(!$s.isAttach(k)){
+                    await $s.commitChilds(k,v,$s,beforeCommit);
+                }
+                else{
+                    await beforeCommit(k,v,$s,beforeCommit);
+                    await $s.commit(k,v,$s);
+                }
+            },
+            async ($s)=>{
+                debugger;
+                // sliblings를 찾다 에러가 나지 않을걸 알기에
+                if($s.isAttach(k)){
+                    await beforeCommit(k,v,$s,beforeCommit);
+                    await $s.commit(k,v,$s);
+                }
             }
-            else{
-                await $s.commit(k,v);
-            }
-        })
+        )
     }
     async dispatchChild(k,v){
-        let state = await __iterateAsync(this.children[Symbol.iterator](),async ($store)=>await $store.dispatch(k,v));
+        // not rollback
+        let oldGroup = this.children.map($store=>$store.get(k));
+        let dispatchedResult = await __iterateAsync(
+            this.children[Symbol.iterator](),
+            async ($store)=>await $store.dispatch(k,v),
+            async ($store,index)=>await $store.dispatch(k,oldGroup[index]),
+        );
         return this;
     }
-    addChild(child = new Store(),o){
-        if(!(o instanceof Store)){
-            o = this;
-        }
-        child.forceSet(parentSymbol,o);
-        o.children.push(child);
+    addChild(child = new Store()){
+        child.forceSet(parentSymbol,this);
+        this.children.push(child);
         return child;
     }
     removeChild(o){
@@ -159,6 +197,20 @@ const Store = class Store extends Map{
             this.commit(prop,tempValue,lazyStore);
         }
         return wrapProxy(this);
+    }
+    detech(prop,...action){
+        let $attachStore = this.init(observeSymbol).init(prop,[]);
+        if (action.length === 0) {
+            $attachStore.splice(0,Infinity);
+        }
+        else{
+            for (var i = 0; i < action.length; i++) {
+                let index = $attachStore.indexOf(action[i]);
+                if(index >= 0){
+                    $attachStore.splice(index,1);
+                }
+            }
+        }
     }
 }
 

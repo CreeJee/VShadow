@@ -1,16 +1,38 @@
-import Store from "./store.js";
+import {Store,observeSymbol,lazyObserveSymbol} from "./store.js";
 import VSEvent from "./event.js";
+
+const assignClone = Symbol("@@assignSymbol");
+
 const $root = Store.root;
-const isVSElementProperty = Symbol("isVSElementProp");
 const __delegate = (selector,isRoot,self,e)=>{
     let path = e.path;
     return Array.from((isRoot ? self.root : self).querySelectorAll(selector)).find((n)=>path.slice(0,path.indexOf(self)).includes(n))
 }
+const __getAllExtendList = (o,arr=[]) => (o === Object || !o.name) ? arr.concat(o) : __getAllExtendList(Object.getPrototypeOf(o),arr.concat(o));
+const __isExtend = (o,target) => (o === Object || !o.name) ? false : Object.is(o,target) ? true : __isExtend(Object.getPrototypeOf(o),target);
 function VSElement(superConstructor = HTMLElement){
     if(!(Object.getPrototypeOf(superConstructor) === HTMLElement || superConstructor === HTMLElement)){
         throw new Error("need extends HTMLElement");
     }
     return class __VSElement__ extends superConstructor{
+        // private clone util
+        [assignClone](oldNode,newNode){
+            let clonedStore = new Store([["self",newNode]]);
+            clonedStore[observeSymbol] = oldNode.$store[observeSymbol];
+            clonedStore[lazyObserveSymbol] = oldNode.$store[lazyObserveSymbol];
+
+            newNode.$store = clonedStore;
+            newNode.parent = oldNode.parent;
+            newNode.isReady = oldNode.isReady;
+            // remove oldNode
+            oldNode.remove();
+            oldNode.$store.clear();
+            return newNode;
+        }
+        // native observe
+        cloneNode(deep){
+            return this[assignClone](this,document.importNode(this,deep));
+        }
         constructor(){
             super();
             try{
@@ -28,9 +50,14 @@ function VSElement(superConstructor = HTMLElement){
                 this.root.host = this;
                 this.isShadow = false;
             }
-            this.$store = new Store([["self",this]]);
+            this.$store = new Store();
+            this.$store.forceSet("self",this);
             this.isReady = false;
+            
         }
+
+
+        // @TODO : 차후에 super Constructer가 아닌 tagName으로 super를 추출하는 방식의 무언가를 추가
         static extend(superConstructor){
             return VSElement(superConstructor);
         }
@@ -40,11 +67,19 @@ function VSElement(superConstructor = HTMLElement){
         async VShadow(...args){
             return Promise.reject(new Error(`need implements [async ${this.name}.VShadow()]`));
         }
-        get [isVSElementProperty](){
-            return true;
-        }
         static [Symbol.hasInstance](instance) {
-            return instance[isVSElementProperty];
+            if(!(instance instanceof Object)){
+                return false;
+            }
+            let targetProto = instance.constructor;
+            let targetProtoList = __getAllExtendList(targetProto);
+            // @TODO : toString을 대처할만한 다른 방식 찾기
+            return typeof instance === "object" && (
+                targetProtoList.includes(this) || 
+                (
+                    targetProtoList.find(v=>v.toString() === this.toString())
+                )
+            );
         }
         on(type,selector,resolve,reject=()=>{}){
             let result = Array.from(this.querySelectorAll(selector));
